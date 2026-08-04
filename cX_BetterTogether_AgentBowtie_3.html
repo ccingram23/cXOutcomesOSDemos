@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agents on the Revenue Architecture — Better Together · congruentX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1D2530;         /* graphite */
+  --paper:#FCFCFB;       /* warm white */
+  --mist:#ECEFF2;        /* light structure */
+  --hair:#E3E7EB;        /* hairline */
+  --quiet:#828B96;       /* captions */
+  --ms:#0B6BC2;          /* Microsoft first-party */
+  --ms-soft:#E8F1FA;
+  --cx:#76B93C;          /* cX Agent Library */
+  --cx-soft:#F0F7E8;
+  --mc:#3E5470;          /* mission-critical accent (deep slate) */
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:56px 40px 120px}
+
+/* ---------- masthead ---------- */
+.mast{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.brand{font-family:"Inter Tight";font-size:22px;font-weight:600;letter-spacing:-.02em}
+.brand .x{color:var(--cx)}
+.brand-sub{font-size:11px;color:var(--quiet);margin-top:2px;font-weight:500}
+h1{font-family:"Inter Tight";font-weight:200;font-size:52px;line-height:1.06;
+  letter-spacing:-.025em;margin:64px 0 0;max-width:820px}
+h1 b{font-weight:500}
+.lede{margin-top:22px;max-width:640px;color:#4A545F;font-size:16.5px;line-height:1.6}
+.lede b{color:var(--ink);font-weight:600}
+
+/* ---------- company card ---------- */
+.co{margin-top:36px;display:inline-flex;align-items:baseline;gap:18px;flex-wrap:wrap;
+  border-top:1px solid var(--hair);padding-top:14px}
+.co-name{font-family:"Inter Tight";font-weight:500;font-size:17px}
+.co-fact{font-size:12.5px;color:var(--quiet)}
+.co-fact b{color:var(--ink);font-weight:600}
+
+/* ---------- controls ---------- */
+.controls{margin-top:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--mist);border-radius:999px;padding:4px;gap:2px}
+.seg button{border:0;background:transparent;font-family:"Inter";font-size:13px;font-weight:600;
+  color:var(--quiet);padding:9px 20px;border-radius:999px;cursor:pointer;transition:all .22s ease;
+  display:flex;align-items:center;gap:8px}
+.seg button .dot{width:8px;height:8px;border-radius:50%;transition:opacity .2s}
+.seg button[data-src="ms"] .dot{background:var(--ms)}
+.seg button[data-src="cx"] .dot{background:var(--cx)}
+.seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(29,37,48,.12)}
+.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+
+/* ---------- bowtie ---------- */
+.bow-wrap{margin-top:28px;position:relative}
+.bow-svg{width:100%;height:auto;display:block}
+.wing{fill:var(--mist);transition:opacity .3s}
+.waistline{stroke:var(--hair);stroke-width:1}
+.stage-hit{cursor:pointer}
+.stage-hit rect.card{fill:#fff;stroke:var(--hair);rx:10;transition:all .22s ease}
+.stage-hit:hover rect.card{stroke:var(--ink);}
+.stage-hit.sel rect.card{stroke:var(--ink);stroke-width:1.5}
+.stage-hit text{pointer-events:none}
+.st-k{font-family:"Inter";font-size:9.5px;font-weight:700;letter-spacing:.16em;fill:var(--quiet)}
+.st-n{font-family:"Inter Tight";font-size:16px;font-weight:500;fill:var(--ink)}
+.st-c{font-family:"Inter";font-size:10.5px;font-weight:600;fill:var(--quiet)}
+.agent-dot{transition:opacity .35s, r .2s;cursor:pointer}
+.agent-dot.ms{fill:var(--ms)}
+.agent-dot.cx{fill:var(--cx)}
+.agent-dot.dim{opacity:.14}
+.agent-dot:hover{r:6.5}
+.flow{fill:none;stroke-linecap:round;transition:opacity .5s}
+.flow.ms{stroke:var(--ms)}
+.flow.cx{stroke:var(--cx)}
+.bow-note{margin-top:10px;text-align:center;font-size:12.5px;color:var(--quiet)}
+.bow-note b{color:var(--ink)}
+#fxReadout{display:inline-block;min-width:0;font-weight:600;color:var(--ink)}
+
+/* tooltip */
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;font-weight:600;
+  padding:6px 11px;border-radius:7px;opacity:0;transition:opacity .15s;z-index:50;transform:translate(-50%,-140%)}
+.tip small{display:block;font-weight:500;opacity:.7;font-size:10.5px}
+
+/* ---------- stage detail ---------- */
+.detail{margin-top:96px;display:none}
+.detail.open{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.d-kick{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--quiet);text-transform:uppercase}
+.d-title{font-family:"Inter Tight";font-weight:300;font-size:36px;letter-spacing:-.02em;margin:6px 0 4px}
+.d-jtbd{color:#4A545F;max-width:620px;font-size:15.5px}
+.cols{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.col-h{display:flex;align-items:center;gap:10px;font-family:"Inter Tight";font-size:15px;font-weight:600;
+  padding-bottom:12px;border-bottom:1px solid var(--hair)}
+.col-h .dot{width:9px;height:9px;border-radius:50%}
+.col-h.ms .dot{background:var(--ms)} .col-h.cx .dot{background:var(--cx)}
+.col-h small{margin-left:auto;font-size:11px;font-weight:600;color:var(--quiet)}
+.arow{display:flex;align-items:center;gap:14px;padding:16px 10px;border-bottom:1px solid var(--hair);
+  cursor:pointer;transition:background .18s;border-radius:8px}
+.arow:hover{background:#F6F8F9}
+.arow:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.arow .nm{font-weight:600;font-size:14.5px}
+.arow .one{font-size:12.5px;color:var(--quiet);margin-top:1px}
+.arow .go{margin-left:auto;color:var(--quiet);font-size:16px;transition:transform .18s}
+.arow:hover .go{transform:translateX(3px);color:var(--ink)}
+.badge{font-size:9.5px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.badge.std{background:var(--cx-soft);color:#4C7A1F}
+.badge.mc{background:var(--mc);color:#fff}
+.badge.ga{background:var(--ms-soft);color:var(--ms)}
+.empty-col{padding:22px 10px;color:var(--quiet);font-size:13.5px;line-height:1.6;border-bottom:1px solid var(--hair)}
+.empty-col b{color:var(--ink)}
+
+/* ---------- agent panel ---------- */
+.scrim{position:fixed;inset:0;background:rgba(29,37,48,.28);opacity:0;pointer-events:none;transition:opacity .3s;z-index:90}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(480px,94vw);background:#fff;z-index:100;
+  transform:translateX(102%);transition:transform .38s cubic-bezier(.3,.9,.3,1);
+  box-shadow:-16px 0 48px rgba(29,37,48,.14);display:flex;flex-direction:column}
+.panel.on{transform:none}
+.p-head{padding:34px 36px 20px;border-bottom:1px solid var(--hair)}
+.p-src{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.p-src .dot{width:8px;height:8px;border-radius:50%}
+.p-src.ms{color:var(--ms)} .p-src.ms .dot{background:var(--ms)}
+.p-src.cx{color:#4C7A1F} .p-src.cx .dot{background:var(--cx)}
+.p-name{font-family:"Inter Tight";font-weight:400;font-size:27px;letter-spacing:-.02em;margin-top:8px}
+.p-badges{margin-top:10px;display:flex;gap:6px}
+.p-close{position:absolute;top:22px;right:22px;border:0;background:var(--mist);width:34px;height:34px;
+  border-radius:50%;cursor:pointer;font-size:15px;color:var(--ink)}
+.p-body{padding:8px 36px 40px;overflow-y:auto}
+.p-sec{margin-top:26px}
+.p-sec .k{font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--quiet)}
+.p-sec .v{margin-top:6px;font-size:14.5px;color:#39424D;line-height:1.62}
+.p-kpi{margin-top:26px;background:#F6F8F9;border-radius:12px;padding:18px 20px}
+.p-kpi .num{font-family:"Inter Tight";font-weight:300;font-size:30px;letter-spacing:-.02em}
+.p-kpi .cap{font-size:12px;color:var(--quiet);font-weight:600;margin-top:2px}
+.p-pair{margin-top:26px;border:1px solid var(--hair);border-radius:12px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.p-pair .glyph{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:14px}
+.p-pair.to-ms .glyph{background:var(--ms-soft);color:var(--ms)}
+.p-pair.to-cx .glyph{background:var(--cx-soft);color:#4C7A1F}
+.p-pair .t{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--quiet)}
+.p-pair .d{font-size:13.5px;color:#39424D;margin-top:3px;line-height:1.55}
+.p-pair .d b{font-weight:600}
+
+
+/* ---------- scenario mode ---------- */
+.scn-launch{border:0;background:var(--ink);color:#fff;font-family:"Inter";font-size:13px;
+  font-weight:600;padding:11px 22px;border-radius:999px;cursor:pointer;transition:opacity .2s}
+.scn-launch:hover{opacity:.85}
+.scn-launch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.scn-tiles{display:none;margin-top:56px}
+.scn-tiles.open{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.scn-tiles-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.scn-ask{font-family:"Inter Tight";font-weight:300;font-size:30px;letter-spacing:-.02em;margin-top:6px}
+.scn-back{border:0;background:transparent;color:var(--quiet);font-size:13px;font-weight:600;cursor:pointer}
+.scn-back:hover{color:var(--ink)}
+.scn-grid{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.scn-tile{text-align:left;background:#fff;border:1px solid var(--hair);border-radius:14px;
+  padding:22px 22px 18px;cursor:pointer;transition:all .2s ease;font-family:"Inter";display:flex;
+  flex-direction:column;gap:14px}
+.scn-tile:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 10px 26px rgba(29,37,48,.08)}
+.scn-tile:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.scn-fr{font-family:"Inter Tight";font-weight:400;font-size:18px;line-height:1.35;letter-spacing:-.01em;color:var(--ink)}
+.scn-st{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--quiet)}
+.scn-bar{display:none;margin-top:56px}
+.scn-bar.open{display:block;animation:rise .45s cubic-bezier(.2,.7,.2,1)}
+.scn-sentence{font-family:"Inter Tight";font-weight:300;font-size:clamp(22px,3vw,32px);
+  line-height:1.35;letter-spacing:-.02em;max-width:960px;min-height:2.6em}
+.scn-sentence b{font-weight:500}
+.frag{opacity:0;transform:translateY(8px);display:inline;transition:opacity .6s ease,transform .6s ease}
+.frag.in{opacity:1;transform:none}
+.frag.amber b{color:#B45309}
+.scn-ctl{margin-top:20px;display:flex;align-items:center;gap:18px}
+.scn-next{border:0;background:var(--ink);color:#fff;font-size:13.5px;font-weight:600;
+  padding:11px 24px;border-radius:999px;cursor:pointer;font-family:"Inter";transition:opacity .2s}
+.scn-next:hover{opacity:.85}
+.scn-exit{border:0;background:transparent;color:var(--quiet);font-size:13px;font-weight:600;cursor:pointer}
+.scn-exit:hover{color:var(--ink)}
+.scn-prog{margin-left:auto;display:flex;gap:6px}
+.pg{width:7px;height:7px;border-radius:50%;background:var(--hair);transition:background .3s}
+.pg.on{background:var(--ink)}
+/* svg scenario states */
+.dimmed .stage-hit{opacity:.22;pointer-events:none;transition:opacity .5s}
+.dimmed .stage-hit.focus{opacity:1}
+.dimmed .agent-dot{opacity:.10;pointer-events:none;transition:opacity .5s}
+.dimmed .agent-dot.lit{opacity:1;pointer-events:auto}
+.dimmed .wing{opacity:.55}
+.crack{fill:none;stroke:#D97706;stroke-width:2.5;stroke-dasharray:7 5;stroke-linejoin:round;
+  opacity:0;transition:opacity .7s}
+.crack.in{opacity:1}
+.crack.heal{opacity:0;transition:opacity 1s}
+.relay-line{stroke:var(--ink);stroke-width:1.6;opacity:.55;transition:stroke-dashoffset .7s ease}
+.pulse{fill:none;stroke-width:2;opacity:.9}
+.pulse.ms{stroke:var(--ms)} .pulse.cx{stroke:var(--cx)}
+.pulse.go{animation:pulseGo .85s ease-out forwards}
+@keyframes pulseGo{to{r:22;opacity:0}}
+/* end card */
+.endcard{display:none;margin-top:40px;border:1px solid var(--hair);border-radius:18px;padding:34px 38px}
+.endcard.open{display:block;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
+.ec-h{font-family:"Inter Tight";font-weight:300;font-size:28px;letter-spacing:-.02em;margin-top:8px;max-width:760px}
+.ec-proof{margin-top:8px;font-size:14px;font-weight:600;color:#4C7A1F}
+.ec-relay{margin-top:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ec-chip{border:1px solid var(--hair);background:#fff;border-radius:999px;padding:9px 18px;
+  font-family:"Inter";font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .18s}
+.ec-chip::before{content:"";width:8px;height:8px;border-radius:50%}
+.ec-chip.ms::before{background:var(--ms)} .ec-chip.cx::before{background:var(--cx)}
+.ec-chip:hover{border-color:var(--ink);transform:translateY(-1px)}
+.ec-arr{color:var(--quiet);font-size:15px}
+.ec-note{margin-top:16px;font-size:12.5px;color:var(--quiet);max-width:640px}
+.ec-btns{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
+.ec-b{border:1px solid var(--hair);background:#fff;font-family:"Inter";font-size:13px;font-weight:600;
+  color:var(--ink);padding:10px 22px;border-radius:999px;cursor:pointer;transition:all .18s}
+.ec-b:hover{border-color:var(--ink)}
+.ec-b.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.ec-b.primary:hover{opacity:.85}
+
+
+/* ---------- agent media slot ---------- */
+.p-media{margin-top:24px;background:#F6F8F9;border-radius:14px;padding:16px 14px 10px}
+.p-media.has-vid{cursor:pointer;transition:box-shadow .2s}
+.p-media.has-vid:hover{box-shadow:0 4px 18px rgba(29,37,48,.10)}
+.p-media svg{width:100%;height:auto;display:block}
+.m-sig{font-family:"Inter";font-size:9px;font-weight:600;fill:#5A646F}
+.m-act{font-family:"Inter";font-size:9.5px;font-weight:700;fill:#fff;letter-spacing:.02em}
+.m-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:0 4px}
+.m-kind{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--quiet)}
+.p-vid{border:0;background:var(--ink);color:#fff;font-family:"Inter";font-size:11.5px;font-weight:600;
+  padding:7px 14px;border-radius:999px;cursor:pointer;transition:opacity .2s}
+.p-vid:hover{opacity:.85}
+.p-vid-soon{font-size:11.5px;font-weight:600;color:#B4BBC3}
+
+
+/* ---------- revenue lever pills ---------- */
+.levers{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.lv-k{font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--quiet);margin-right:3px}
+.lv{font-family:"Inter";font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:5px 13px;
+  border-radius:999px;border:1.4px solid transparent;text-transform:uppercase}
+.lv.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.lv.sec{background:transparent;border-color:var(--ink);color:var(--ink)}
+.lv.off{background:transparent;border-color:var(--hair);color:#C2C8CF}
+.ec-levers{margin-top:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+
+/* ---------- footer ---------- */
+.foot{margin-top:110px;border-top:1px solid var(--hair);padding-top:22px;display:flex;
+  justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:12px;color:var(--quiet)}
+.foot b{color:var(--ink);font-weight:600}
+
+@media(max-width:860px){
+  .page{padding:36px 20px 90px}
+  h1{font-size:34px;margin-top:44px}
+  .cols{grid-template-columns:1fr;gap:40px}
+  .controls{justify-content:flex-start}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="mast">
+    <div>
+      <div class="brand">congruent<span class="x">X</span></div>
+      <div class="brand-sub">cX REVOS · Revenue Architecture Experts</div>
+    </div>
+    <div style="text-align:right;font-size:11px;color:var(--quiet);font-weight:600">
+      MICROSOFT FIRST-PARTY + cX AGENT LIBRARY
+    </div>
+  </header>
+
+  <h1>One revenue motion.<br><b>Two intelligences, working together.</b></h1>
+  <p class="lede">Microsoft's first-party Dynamics&nbsp;365 agents set the floor.
+  The <b>cX Agent Library</b> raises the ceiling — extending agentic coverage across every
+  stage of the bowtie, from first signal to compounding expansion. Select a stage to see
+  who does what, and how they hand off to each other.</p>
+
+  <div class="co">
+    <span class="co-name">Meridian Industrial</span>
+    <span class="co-fact"><b>$1.1B</b> revenue</span>
+    <span class="co-fact"><b>Single GTM</b> · high-touch, named accounts</span>
+    <span class="co-fact"><b>Long cycles</b> · renewal-heavy</span>
+    <span class="co-fact">Dynamics&nbsp;365 + Copilot Studio</span>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="tablist" aria-label="Agent source">
+      <button data-src="all" class="active">All agents</button>
+      <button data-src="ms"><span class="dot"></span>Microsoft first-party</button>
+      <button data-src="cx"><span class="dot"></span>cX Agent Library</button>
+    </div>
+    <button class="scn-launch" id="scnLaunch">Walk a scenario</button>
+  </div>
+
+  <section class="scn-tiles" id="scnTiles"></section>
+
+  <section class="scn-bar" id="scnBar">
+    <div class="scn-sentence" id="scnSentence"></div>
+    <div class="scn-ctl">
+      <button class="scn-next" id="scnNext">I need to →</button>
+      <button class="scn-exit" id="scnExit">Exit scenario</button>
+      <div class="scn-prog" id="scnProg"></div>
+    </div>
+  </section>
+
+  <div class="bow-wrap">
+    <svg class="bow-svg" id="bowSvg" viewBox="0 0 1100 330" xmlns="http://www.w3.org/2000/svg" aria-label="Revenue bowtie with agent coverage"></svg>
+    <div class="bow-note" id="bowNote">The revenue architecture of Meridian Industrial · <b>select any stage</b> to open its agents</div>
+  </div>
+
+  <section class="endcard" id="endCard"></section>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+
+  <div class="tip" id="tip"></div>
+  <div class="scrim" id="scrim"></div>
+  <aside class="panel" id="panel" role="dialog" aria-modal="true"></aside>
+
+  <footer class="foot">
+    <span>We deliver <b>Outcomes</b>. Led by humans, accelerated by AI.</span>
+    <span><b>Standard</b> and <b>Mission-Critical</b> agents · operated under cX AgentOS</span>
+    <span>Confidential</span>
+  </footer>
+</div>
+<script>
+/* ============ DATA ============ */
+const STAGES = [
+  {id:"prospects", k:"LEADGEN", n:"Prospects", jtbd:"Find the accounts that look like our best customers — before they raise a hand."},
+  {id:"leads", k:"LEADDEV", n:"Leads", jtbd:"Qualify every inbound and long-tail lead consistently, and never let one go cold."},
+  {id:"opps", k:"SELLING", n:"Opportunities", jtbd:"Advance the deals that deserve it — with evidence, multi-threading, and momentum."},
+  {id:"win", k:"ACTIVATE", n:"Wins", jtbd:"Convert commitment into signature without losing margin or weeks to paperwork.", waist:true},
+  {id:"onboard", k:"ONBOARD", n:"Live", jtbd:"Reach first value fast, with clear owners and a success plan the client can see."},
+  {id:"retain", k:"RETAIN", n:"Customers", jtbd:"See churn coming before the customer says it — and act while it's still cheap."},
+  {id:"expand", k:"EXPAND", n:"Growth", jtbd:"Turn healthy accounts into the next deal — systematically, not opportunistically."}
+];
+
+const AGENTS = [
+/* ---- Microsoft first-party ---- */
+{id:"ms-sales-agent", src:"ms", stage:"prospects", name:"Sales Agent", status:"Microsoft 365 Copilot",
+ one:"Researches and prioritizes leads, drafts outreach, books meetings",
+ does:"Works the top of the funnel autonomously — researching accounts and contacts across CRM, Microsoft Graph, and the public web, drafting personalized outreach, and handing sellers a warm conversation instead of a cold list.",
+ moment:"A new target account enters the territory, or a long-dormant contact shows fresh activity.",
+ signal:"CRM history, email and meeting signals from Microsoft Graph, public web research.",
+ kpi:"No lead left behind", kcap:"pipeline coverage across the long tail",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"<b>Buyer Intent Enrichment</b> and <b>Account Prioritization</b> feed it a ranked, intent-scored target list — so the agent works the right accounts first, not just the newest ones."}},
+
+{id:"ms-sales-research", src:"ms", stage:"prospects", name:"Sales Research Agent", status:"Dynamics 365 Sales",
+ one:"Deep research over pipeline and market to drive strategic decisions",
+ does:"Runs deep, multi-source research across your sales data to answer strategic questions — territory health, segment performance, whitespace — the way an analyst would, but on demand.",
+ moment:"Quarterly planning, territory design, or any moment leadership asks 'where should we hunt next?'",
+ signal:"Dynamics 365 sales data, historical outcomes, market and account research.",
+ kpi:"Analyst-grade answers", kcap:"in minutes, not planning cycles",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Account Prioritization</b> turns its research into a living propensity model that re-ranks targets continuously — research becomes an always-on motion, not a quarterly event."}},
+
+{id:"ms-sqa", src:"ms", stage:"leads", name:"Sales Qualification Agent", status:"Generally available",
+ one:"Autonomously researches, scores, and engages every lead to handoff",
+ does:"Reviews every inbound and long-tail lead, researches the company, scores fit against your ICP, drafts and sends personalized outreach under guardrails, and hands off the moment a lead shows buying intent.",
+ moment:"Every new lead — and every old one your team never had time to touch.",
+ signal:"CRM data, public web sources, configured ICP, email engagement.",
+ kpi:"120+ hrs", kcap:"saved in the first three weeks of one published pilot",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Lead Scoring</b> and <b>Dynamic Journey Orchestration</b> pick up the leads that aren't ready yet — nurturing them across channels until they re-qualify, so handoff quality keeps rising."}},
+
+{id:"ms-soa", src:"ms", stage:"opps", name:"Sales Opportunity Agent", status:"Dynamics 365 Sales",
+ one:"Researches active deals; surfaces buying signals, risks, stakeholders",
+ does:"Continuously researches active opportunities — account developments, stakeholder movement, competitive presence — and surfaces buying signals and risks with recommended next actions on the record.",
+ moment:"Any material change on an active deal: a stakeholder shift, a competitor mention, a stall.",
+ signal:"CRM activity, email threads, meeting content, external account news.",
+ kpi:"Early warning", kcap:"risk surfaced before the forecast call",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Deal Health (WinScore)</b> blends its signals with SPICED coverage, velocity, and multi-threading into one explainable score — so managers coach the driver, not the symptom."}},
+
+{id:"ms-close", src:"ms", stage:"win", name:"Sales Close Agent", status:"Dynamics 365 Sales",
+ one:"Consolidated real-time deal health through the close motion",
+ does:"Acts as the early-warning system for deals in the close zone — consolidating Dynamics 365 data, client email threads, and internal meetings into a live view of what could still go wrong.",
+ moment:"The deal enters commit — when surprises are most expensive.",
+ signal:"CRM record, client email threads, internal team meetings.",
+ kpi:"Fewer slips", kcap:"commit-stage surprises caught early",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"When it flags friction, cX <b>Opportunity Conversion</b> and <b>Pricing & Proposal</b> run the play — clean paper, guardrailed pricing, and a proposal that moves the same day."}},
+
+{id:"ms-order", src:"ms", stage:"onboard", name:"Sales Order Agent", status:"Dynamics 365",
+ one:"Automates order intake, validation, and confirmation",
+ does:"Takes signed intent through order intake — validating, confirming, and entering orders so the win becomes a live account without manual re-keying or handoff gaps.",
+ moment:"Signature lands; the clock on time-to-first-value starts.",
+ signal:"Order documents, product catalog, account and contract data.",
+ kpi:"Zero re-keying", kcap:"from signature to system of record",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Stakeholder Map + Success Plan</b> takes the confirmed order and stands up owners, milestones, and the success plan — the commercial handoff becomes an onboarding motion."}},
+
+{id:"ms-sched", src:"ms", stage:"onboard", name:"Scheduling Operations Agent", status:"Field Service",
+ one:"Optimizes scheduling and dispatch for delivery teams",
+ does:"Continuously optimizes schedules for delivery and field teams — rebalancing around delays, cancellations, and priorities so onboarding work lands on time.",
+ moment:"Every schedule disruption during the go-live window.",
+ signal:"Work orders, resource calendars, travel and priority constraints.",
+ kpi:"On-time starts", kcap:"during the window that sets the relationship",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Follow-Up Cadence</b> wraps every scheduled milestone in client-facing communication — the customer always knows what happens next."}},
+
+{id:"ms-intent", src:"ms", stage:"retain", name:"Customer Intent Agent", status:"Customer Service",
+ one:"Discovers intent behind every conversation; guides resolution",
+ does:"Builds and maintains a living library of customer intents from historic and live conversations — powering both self-service and rep-assist so issues route to resolution faster.",
+ moment:"Every inbound conversation, before frustration compounds.",
+ signal:"Historic and live conversations across channels.",
+ kpi:"Faster resolution", kcap:"intent understood on the first touch",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Renewal Risk</b> reads its intent patterns as churn signal — a spike in billing-dispute intents becomes a renewal intervention, not just a closed ticket."}},
+
+{id:"ms-case", src:"ms", stage:"retain", name:"Case Management Agent", status:"Customer Service",
+ one:"Automates the case lifecycle — creation, enrichment, resolution",
+ does:"Runs the case lifecycle end to end — creating, enriching, updating, and following up on cases, with optional autonomous resolution for well-understood issues.",
+ moment:"Every case that doesn't need a human — and every one that does, arriving enriched.",
+ signal:"Case history, knowledge base, conversation context.",
+ kpi:"Lower AHT", kcap:"reps spend time on judgment, not admin",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"Case outcomes feed cX <b>Proactive Churn Prevention</b> health scoring — service quality becomes a leading indicator in the retention model."}},
+
+{id:"ms-knowledge", src:"ms", stage:"retain", name:"Customer Knowledge Mgmt Agent", status:"Customer Service",
+ one:"Auto-generates and maintains knowledge from real cases",
+ does:"Turns resolved cases and conversations into knowledge articles automatically — in real time and from history — so the answer to yesterday's problem is available before it's asked again.",
+ moment:"Every resolved case that would otherwise stay tribal knowledge.",
+ signal:"Cases, conversations, resolution patterns, article analytics.",
+ kpi:"Compounding knowledge", kcap:"every resolution makes the next one faster",
+ pair:{dir:"cx", label:"Extended by the cX library", text:"cX <b>Cross-Sell</b> mines the same knowledge patterns for expansion signals — the products customers ask about are the products they're ready to buy."}},
+
+/* ---- cX Agent Library ---- */
+{id:"cx-intent", src:"cx", stage:"prospects", tier:"std", name:"Buyer Intent Enrichment",
+ one:"Captures anonymous intent; prioritizes and personalizes outreach",
+ does:"Detects buying intent from web and CRM signals — including the anonymous research your targets do before they ever fill a form — then prioritizes outreach and personalizes content and timing.",
+ moment:"An account in your ICP starts researching the problem you solve.",
+ signal:"Web intent signals, CRM engagement history, firmographic fit.",
+ kpi:"20–50%", kcap:"higher campaign ROI vs broad programs",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Feeds a ranked, intent-scored account list to Microsoft's <b>Sales Agent</b> — so first-party outreach starts with who's actually in-market."}},
+
+{id:"cx-priority", src:"cx", stage:"prospects", tier:"std", name:"Account Prioritization",
+ one:"Propensity models rank targets by likelihood to buy",
+ does:"Ranks target accounts using propensity models built on historical outcomes and live engagement — turning 'who should we call?' from opinion into evidence.",
+ moment:"Territory planning, and every week after, as signals shift the ranking.",
+ signal:"Historical win/loss outcomes, live engagement, firmographics.",
+ kpi:"+10–15%", kcap:"win rate on prioritized accounts",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Gives the <b>Sales Research Agent</b> a continuously re-ranked target model — strategic research becomes an always-on operating rhythm."}},
+
+{id:"cx-dormant", src:"cx", stage:"prospects", tier:"std", name:"Dormant Account Reactivation",
+ one:"Finds and re-engages inactive accounts with an updated story",
+ does:"Sweeps the install base and dead pipeline for accounts gone quiet, matches them to a refreshed offer and story, and re-opens the conversation.",
+ moment:"An account crosses the dormancy threshold — before the relationship fully decays.",
+ signal:"Activity recency, past purchase patterns, current offer fit.",
+ kpi:"10–20%", kcap:"of dormant accounts reactivated",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Reactivated accounts route straight into Microsoft's <b>Sales Agent</b> motion for outreach and meeting capture — nothing re-enters the funnel manually."}},
+
+{id:"cx-journey", src:"cx", stage:"leads", tier:"std", name:"Dynamic Journey Orchestration",
+ one:"Next-best-action journeys across email, web, and ads",
+ does:"Orchestrates multi-channel nurture journeys with next-best-action sequencing — auto-enrolling segments and adapting the path as engagement changes.",
+ moment:"A lead engages but isn't sales-ready — the gap where most pipelines leak.",
+ signal:"Engagement across email, web, and ads; segment and persona fit.",
+ kpi:"10–15%", kcap:"lift in journey-sourced revenue",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Catches what the <b>Sales Qualification Agent</b> deprioritizes and nurtures it back to re-qualification — the two agents form a closed loop with no exit ramp to nowhere."}},
+
+{id:"cx-leadscore", src:"cx", stage:"leads", tier:"std", name:"Lead Scoring Agent",
+ one:"Unified scoring across fit, behavior, and conversation signals",
+ does:"Scores leads on a single model that blends firmographic fit, behavioral engagement, and conversation signals — so sales and marketing argue about strategy, not definitions.",
+ moment:"Every scoring event that decides where seller attention goes today.",
+ signal:"Fit data, behavioral engagement, call and email conversation signals.",
+ kpi:"One number", kcap:"both teams trust for routing and SLAs",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Sharpens the ICP model the <b>Sales Qualification Agent</b> scores against — first-party qualification keeps learning from your real outcomes."}},
+
+{id:"cx-research", src:"cx", stage:"leads", tier:"std", name:"Account Research Copilot",
+ one:"Aggregates research to equip high-quality early discovery",
+ does:"Assembles company, industry, and stakeholder research into a discovery-ready brief — so the first conversation starts at question three, not question one.",
+ moment:"A qualified lead books a first meeting.",
+ signal:"Public research, CRM history, industry and persona context.",
+ kpi:"20–40%", kcap:"research and admin time reduction",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Picks up the <b>Sales Qualification Agent's</b> handoff brief and deepens it for the human conversation — autonomous qualification flows into high-touch discovery."}},
+
+{id:"cx-dealhealth", src:"cx", stage:"opps", tier:"std", name:"Deal Health (WinScore)",
+ one:"One explainable score: SPICED coverage, velocity, multi-threading",
+ does:"Computes a single, explainable WinScore per opportunity — blending SPICED completeness, engagement velocity, multi-threading, stage exit criteria, and time-to-critical-event, with driver attribution managers can coach against.",
+ moment:"Forecast reviews, and any moment a deal's story and its data disagree.",
+ signal:"Activity data, Dialogue Copilot call scores, stakeholder map, stage criteria.",
+ kpi:"Explainable forecast", kcap:"score, confidence, and drivers on every deal",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Consumes the <b>Sales Opportunity Agent's</b> research and risk signals as model inputs — first-party intelligence becomes part of one score everyone runs the deal by."}},
+
+{id:"cx-meetprep", src:"cx", stage:"opps", tier:"std", name:"Meeting Prep Agent",
+ one:"Two-minute pre-meeting brief: insights, objections, talking points",
+ does:"Builds a concise pre-meeting brief from CRM, email, and news — key insights, likely objections, and suggested talking points tuned to the meeting type.",
+ moment:"Two minutes before every meeting that matters.",
+ signal:"CRM record, email threads, company news, meeting type.",
+ kpi:"Every meeting", kcap:"starts prepared, not improvised",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Draws on <b>Sales Opportunity Agent</b> stakeholder and risk research so the brief reflects what changed since the last touch."}},
+
+{id:"cx-betweencalls", src:"cx", stage:"opps", tier:"std", name:"Between-Calls Impact",
+ one:"Auto-curated 'no-ask' value touches that keep deals moving",
+ does:"After each meeting, classifies the buyer's current Buying Job and runs the right play — impact traces, CFO packs, evidence — publishing to the digital sales room and drafting the outreach that advances the deal without asking for anything.",
+ moment:"The silence between meetings, where momentum goes to die.",
+ signal:"Meeting notes, Buying Job classification, engagement telemetry.",
+ kpi:"No ghosting", kcap:"momentum sustained between every touch",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"When the <b>Sales Opportunity Agent</b> flags a stall, this agent runs the re-engagement play — detection and intervention, paired."}},
+
+{id:"cx-pov", src:"cx", stage:"opps", tier:"std", name:"AI-Assisted POV Builder",
+ one:"One-click point-of-view documents from opportunity data",
+ does:"Generates a customized point-of-view document from opportunity data, industry research, and conversation history — strategy-consistent, client-ready, tied to the record.",
+ moment:"The deal needs a written reason to believe — today, not next week.",
+ signal:"Opportunity data, industry and company research, conversation history.",
+ kpi:"Hours → minutes", kcap:"from blank page to client-ready POV",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Turns <b>Sales Opportunity Agent</b> research into the differentiated document that wins the evaluation — insight becomes artifact."}},
+
+{id:"cx-oppconvert", src:"cx", stage:"win", tier:"mc", name:"Opportunity Conversion Agent",
+ one:"Runs the commit-stage playbook from verbal yes to signature",
+ does:"Owns the last mile — sequencing the close plan, coordinating stakeholders and approvals, and clearing the procedural friction between verbal commitment and signature.",
+ moment:"'We're moving forward' — the most dangerous sentence in revenue.",
+ signal:"Close plan status, approval chains, stakeholder engagement.",
+ kpi:"Compressed close", kcap:"days removed from commit-to-signature",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Activates on <b>Sales Close Agent</b> risk flags — first-party early warning triggers the mission-critical close play."}},
+
+{id:"cx-pricing", src:"cx", stage:"win", tier:"mc", name:"Pricing & Proposal Agent",
+ one:"Guardrailed configuration, pricing, and discount elasticity",
+ does:"Guides configuration and pricing with elasticity-aware discount guardrails — producing accurate proposals fast while protecting the margin the deal was built on.",
+ moment:"Procurement asks for 'their best number' — and the clock starts.",
+ signal:"Product catalog, pricing elasticity, discount history, deal context.",
+ kpi:"Margin held", kcap:"faster quotes without discount drift",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Prices what the <b>Sales Close Agent</b> is tracking — the commercial response matches the live state of the deal."}},
+
+{id:"cx-clm", src:"cx", stage:"win", tier:"mc", name:"Intelligent CLM & Redline Review",
+ one:"AI clause analysis, fallback language, and risk flags",
+ does:"Accelerates contracting with clause analysis, standardized fallback language, automated redline review, and signature routing — legal review focuses on judgment, not pattern-matching.",
+ moment:"Redlines arrive and legal has a two-week queue.",
+ signal:"Contract language, clause library, risk policy, approval routing.",
+ kpi:"30–50%", kcap:"faster contracting; fewer escalations",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Closes the loop the <b>Sales Close Agent</b> monitors — contract friction, the most common commit-stage stall, gets its own agent."}},
+
+{id:"cx-stakemap", src:"cx", stage:"onboard", tier:"std", name:"Stakeholder Map + Success Plan",
+ one:"Maps the org, sets success metrics, owners, and timeline",
+ does:"Stands up the post-sale operating picture — stakeholder map, success metrics, milestone owners, and timeline — and keeps it live in Teams and Planner as reality shifts.",
+ moment:"Kickoff, when the sale's promises must become someone's plan.",
+ signal:"Deal history, org mapping, milestone and risk tracking.",
+ kpi:"10–20%", kcap:"more expansion via multi-threading and NRR",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Takes the <b>Sales Order Agent's</b> confirmed order as its starting state — commercial close flows directly into a governed onboarding motion."}},
+
+{id:"cx-adoption", src:"cx", stage:"onboard", tier:"std", name:"cxAdoptionMonitor",
+ one:"Telemetry-verified adoption and time-to-first-value tracking",
+ does:"Instruments adoption from day one — measuring real usage against the success plan and verifying that value claims are backed by telemetry, not anecdote.",
+ moment:"Week two of go-live, when adoption trajectories are set.",
+ signal:"Usage telemetry, milestone completion, engagement depth by role.",
+ kpi:"Verified value", kcap:"outcomes proven with data, not decks",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Measures whether the whole agent fleet — first-party and library — is actually being used. The evidence layer of the better-together story."}},
+
+{id:"cx-cadence", src:"cx", stage:"onboard", tier:"std", name:"Follow-Up Cadence Agent",
+ one:"Keeps onboarding momentum with owner alerts and client comms",
+ does:"Maintains onboarding rhythm — tracking milestones, alerting owners on delays, and keeping client-facing communication ahead of every step so momentum never depends on memory.",
+ moment:"The week a milestone quietly slips and nobody notices.",
+ signal:"Milestone status, task ownership, delay patterns.",
+ kpi:"Faster TTFV", kcap:"time-to-first-value without the drift",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Wraps the <b>Scheduling Operations Agent's</b> optimized schedule in proactive communication — operations and experience, aligned."}},
+
+{id:"cx-renewal", src:"cx", stage:"retain", tier:"mc", name:"Renewal Risk Agent",
+ one:"Predicts renewal risk and triggers save playbooks early",
+ does:"Continuously scores renewal risk from usage, service, sentiment, and engagement signals — and triggers the save playbook while the renewal is still months out and the intervention still cheap.",
+ moment:"Ninety days before the renewal everyone assumed was safe.",
+ signal:"Usage trends, ticket and sentiment patterns, engagement decay.",
+ kpi:"Revenue defended", kcap:"saves run before the customer decides",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Reads <b>Customer Intent Agent</b> patterns and <b>Case Management</b> outcomes as leading churn indicators — service signals become revenue signals."}},
+
+{id:"cx-churn", src:"cx", stage:"retain", tier:"std", name:"Proactive Churn Prevention",
+ one:"Health scoring tied to concrete playbooks, not dashboards",
+ does:"Predicts churn risk from usage, tickets, and sentiment — and ties every risk tier to a concrete playbook with an owner, so health scores drive action instead of decorating dashboards.",
+ moment:"Health dips below threshold — while there's still time to matter.",
+ signal:"Product usage, support tickets, sentiment, engagement signals.",
+ kpi:"10–18%", kcap:"churn reduction where CS acts on it",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Ingests <b>Case Management Agent</b> resolution quality as a health input — how service went predicts whether they stay."}},
+
+{id:"cx-dialogue", src:"cx", stage:"retain", tier:"std", name:"Dialogue Copilot",
+ one:"Call intelligence: scoring, summaries, and coaching signals",
+ does:"Captures and scores customer conversations — summaries, action items, sentiment, and process adherence — turning every call into structured signal for coaching and for every other agent in the fleet.",
+ moment:"Every customer conversation, the richest data source you're not using.",
+ signal:"Call recordings, conversation scoring, sentiment, playbook adherence.",
+ kpi:"Every call counted", kcap:"conversation data feeding the whole fleet",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Enriches the <b>Customer Intent Agent's</b> intent library with scored, structured conversation data — both intelligences hear the same customer."}},
+
+{id:"cx-crosssell", src:"cx", stage:"expand", tier:"mc", name:"Cross-Sell Agent",
+ one:"Systematic cross-sell triggers from usage and buying patterns",
+ does:"Detects cross-sell moments from usage patterns, lookalike buying behavior, and service signals — and routes each trigger to the right owner with the evidence attached, making expansion systematic instead of opportunistic.",
+ moment:"An account's behavior starts matching customers who bought more.",
+ signal:"Usage patterns, lookalike purchase paths, service and knowledge signals.",
+ kpi:"10–30%", kcap:"higher attach rate on triggered plays",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Mines <b>Customer Knowledge Management</b> patterns for demand signals — what customers ask about becomes what you offer next. The right wing of the bowtie is where the library extends furthest beyond first-party coverage."}},
+
+{id:"cx-expandout", src:"cx", stage:"expand", tier:"std", name:"Expansion Outreach Agent",
+ one:"Runs the expansion motion: timing, persona, and message",
+ does:"Executes expansion outreach with the same rigor as new-logo motion — right stakeholder, right timing, message grounded in the account's own verified outcomes.",
+ moment:"A verified outcome creates the credibility to ask for more.",
+ signal:"Account health, verified outcomes, stakeholder map, whitespace.",
+ kpi:"NRR lift", kcap:"expansion run as a motion, not a hope",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"Hands interested expansion stakeholders into the <b>Sales Agent</b> motion for meeting capture — the funnel loops back to its own beginning."}},
+
+{id:"cx-nba", src:"cx", stage:"expand", tier:"std", name:"Next-Best-Action Agent",
+ one:"One prioritized action per account, across the whole fleet",
+ does:"Synthesizes signals from every agent — first-party and library — into a single prioritized next action per account, so humans always know the highest-leverage move.",
+ moment:"Monday morning: 200 accounts, 8 hours, one question — what matters most?",
+ signal:"All fleet signals: health, risk, intent, opportunity, and outcome data.",
+ kpi:"Focus", kcap:"human attention allocated by evidence",
+ pair:{dir:"ms", label:"Better together with Microsoft", text:"The synthesis layer across both intelligences — every Microsoft agent's signal and every library agent's signal, resolved into one recommended human move."}}
+];
+
+/* ============ STATE ============ */
+let srcFilter = "all";
+let selStage = null;
+
+/* ============ BOWTIE RENDER ============ */
+const svg = document.getElementById("bowSvg");
+const NS = "http://www.w3.org/2000/svg";
+const W=1100, H=330, TOP=30, CARD_Y=118, CARD_H=58, DOT_Y0=222;
+const colW = W/7;
+
+function el(tag, attrs){ const e=document.createElementNS(NS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+function wingPoints(withAgents){
+  // left wing converges to waist; right wing expands. "With agents" = thicker waist + wider right.
+  const cxL0=10, cxWaistL=3*colW+14, cxWaistR=4*colW-14, cxR1=W-10;
+  const t = withAgents;
+  const leftTop0 = TOP+(t?4:14),  leftBot0 = H-60-(t?4:14);
+  const waistTop = TOP+(t?58:76), waistBot = H-60-(t?58:76);
+  const rightTop1 = TOP+(t?0:26), rightBot1 = H-60-(t?0:26);
+  return {
+    left:[[cxL0,leftTop0],[cxWaistL,waistTop],[cxWaistL,waistBot],[cxL0,leftBot0]],
+    right:[[cxWaistR,waistTop],[cxR1,rightTop1],[cxR1,rightBot1],[cxWaistR,waistBot]]
+  };
+}
+function ptsStr(p){ return p.map(x=>x.join(",")).join(" "); }
+
+const wingL = el("polygon",{class:"wing"});
+const wingR = el("polygon",{class:"wing"});
+svg.appendChild(wingL); svg.appendChild(wingR);
+
+let animFrom = wingPoints(false), animTo = wingPoints(false), animT = 1;
+function setWings(withAgents){
+  animFrom = currentWings(); animTo = wingPoints(withAgents); animT = 0;
+  requestAnimationFrame(stepWings);
+}
+function currentWings(){
+  const lerp=(a,b,t)=>a+(b-a)*t, e=easeT(animT);
+  const mix = s => animFrom[s].map((p,i)=>[lerp(p[0],animTo[s][i][0],e), lerp(p[1],animTo[s][i][1],e)]);
+  return {left:mix("left"), right:mix("right")};
+}
+function easeT(t){ return t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+function stepWings(){
+  animT = Math.min(1, animT + 0.045);
+  const c = currentWings();
+  wingL.setAttribute("points", ptsStr(c.left));
+  wingR.setAttribute("points", ptsStr(c.right));
+  if(animT<1) requestAnimationFrame(stepWings);
+}
+wingL.setAttribute("points", ptsStr(animTo.left));
+wingR.setAttribute("points", ptsStr(animTo.right));
+
+/* architecture label */
+const archLabel = el("text",{x:W/2,y:16,"text-anchor":"middle",class:"st-k"});
+archLabel.textContent = "REVENUE ARCHITECTURE AND OUTCOMES VERIFICATION";
+svg.appendChild(archLabel);
+
+/* stage cards + dots */
+const tip = document.getElementById("tip");
+STAGES.forEach((s,i)=>{
+  const x = i*colW+8, w = colW-16;
+  const g = el("g",{class:"stage-hit",tabindex:"0",role:"button","data-stage":s.id,
+    "aria-label":`Open ${s.n} stage`});
+  const card = el("rect",{class:"card",x,y:CARD_Y,width:w,height:CARD_H,rx:10,
+    fill:s.waist?"var(--ink)":"#fff"});
+  if(s.waist) card.setAttribute("style","fill:#1D2530;stroke:#1D2530");
+  g.appendChild(card);
+  const k = el("text",{x:x+w/2,y:CARD_Y+22,"text-anchor":"middle",class:"st-k"});
+  k.textContent = s.k;
+  if(s.waist) k.setAttribute("style","fill:#9FB4C9");
+  g.appendChild(k);
+  const n = el("text",{x:x+w/2,y:CARD_Y+43,"text-anchor":"middle",class:"st-n"});
+  n.textContent = s.n;
+  if(s.waist) n.setAttribute("style","fill:#fff");
+  g.appendChild(n);
+
+  // counts
+  const msN = AGENTS.filter(a=>a.stage===s.id&&a.src==="ms").length;
+  const cxN = AGENTS.filter(a=>a.stage===s.id&&a.src==="cx").length;
+  const c = el("text",{x:x+w/2,y:CARD_Y+CARD_H+20,"text-anchor":"middle",class:"st-c"});
+  c.textContent = `${msN} Microsoft · ${cxN} cX`;
+  g.appendChild(c);
+
+  // stem
+  g.appendChild(el("line",{x1:x+w/2,y1:CARD_Y+CARD_H+28,x2:x+w/2,y2:DOT_Y0-14,
+    stroke:"var(--hair)","stroke-width":1.5}));
+
+  // agent dots
+  const list = AGENTS.filter(a=>a.stage===s.id);
+  list.forEach((a,j)=>{
+    const perRow=5, row=Math.floor(j/perRow), col=j%perRow, n=Math.min(list.length-row*perRow,perRow);
+    const dx = x+w/2 + (col-(n-1)/2)*18;
+    const dot = el("circle",{class:`agent-dot ${a.src}`,cx:dx,cy:DOT_Y0+row*18,r:5,
+      "data-agent":a.id,"data-src":a.src,tabindex:"0",role:"button","aria-label":a.name});
+    dot.addEventListener("mousemove",ev=>{
+      tip.innerHTML = `${a.name}<small>${a.src==="ms"?"Microsoft first-party":"cX Agent Library"+(a.tier==="mc"?" · Mission-Critical":" · Standard")}</small>`;
+      tip.style.left=ev.clientX+"px"; tip.style.top=ev.clientY+"px"; tip.style.opacity=1;
+    });
+    dot.addEventListener("mouseleave",()=>tip.style.opacity=0);
+    dot.addEventListener("click",ev=>{ev.stopPropagation(); openStage(s.id); openAgent(a.id);});
+    dot.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openStage(s.id);openAgent(a.id);}});
+    g.appendChild(dot);
+  });
+
+  g.addEventListener("click",()=>openStage(s.id));
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openStage(s.id);}});
+  svg.appendChild(g);
+});
+
+/* ============ SOURCE FILTER ============ */
+document.querySelectorAll(".seg button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".seg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    srcFilter = b.dataset.src;
+    applyFilter();
+  });
+});
+function applyFilter(){
+  document.querySelectorAll(".agent-dot").forEach(d=>{
+    d.classList.toggle("dim", srcFilter!=="all" && d.dataset.src!==srcFilter);
+  });
+  if(selStage) renderDetail(selStage);
+  updateNote();
+}
+
+function updateNote(){
+  const note = document.getElementById("bowNote");
+  if(srcFilter==="ms"){
+    note.innerHTML = `<b>Microsoft first-party coverage</b> concentrates left of the waist and in service. The floor is real — and it's included in the platform.`;
+  } else if(srcFilter==="cx"){
+    note.innerHTML = `<b>The cX Agent Library</b> covers every stage — and extends furthest on the right wing, where first-party coverage is thinnest and NRR is made.`;
+  } else {
+    note.innerHTML = `The revenue architecture of Meridian Industrial · <b>select any stage</b> to open its agents`;
+  }
+}
+
+/* ============ STAGE DETAIL ============ */
+const detail = document.getElementById("detail");
+function openStage(id){
+  selStage = id;
+  document.querySelectorAll(".stage-hit").forEach(g=>g.classList.toggle("sel",g.dataset.stage===id));
+  renderDetail(id);
+  detail.classList.add("open");
+  detail.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function agentRow(a){
+  const badge = a.src==="ms"
+    ? `<span class="badge ga">${a.status}</span>`
+    : `<span class="badge ${a.tier}">${a.tier==="mc"?"MISSION-CRITICAL":"STANDARD"}</span>`;
+  return `<div class="arow" tabindex="0" role="button" data-agent="${a.id}">
+    <div><div class="nm">${a.name}</div><div class="one">${a.one}</div></div>
+    ${badge}<span class="go">→</span></div>`;
+}
+function renderDetail(id){
+  const s = STAGES.find(x=>x.id===id);
+  const ms = AGENTS.filter(a=>a.stage===id&&a.src==="ms");
+  const cx = AGENTS.filter(a=>a.stage===id&&a.src==="cx");
+  const showMs = srcFilter!=="cx", showCx = srcFilter!=="ms";
+  const msCol = showMs ? (ms.length
+    ? ms.map(agentRow).join("")
+    : `<div class="empty-col">No first-party agent covers this stage yet. <b>This is where the cX Agent Library extends the platform</b> — and where better-together becomes a growth story, not just an efficiency story.</div>`) : "";
+  const cxCol = showCx ? cx.map(agentRow).join("") : "";
+  detail.innerHTML = `
+    <div class="d-kick">${s.k} · Stage ${STAGES.indexOf(s)+1} of 7</div>
+    <div class="d-title">${s.n}</div>
+    <div class="d-jtbd">${s.jtbd}</div>
+    <div class="cols">
+      ${showMs?`<div><div class="col-h ms"><span class="dot"></span>What Microsoft gives you<small>${ms.length} agent${ms.length===1?"":"s"}</small></div>${msCol}</div>`:""}
+      ${showCx?`<div><div class="col-h cx"><span class="dot"></span>Where cX takes you further<small>${cx.length} agent${cx.length===1?"":"s"}</small></div>${cxCol}</div>`:""}
+    </div>`;
+  detail.querySelectorAll(".arow").forEach(r=>{
+    r.addEventListener("click",()=>openAgent(r.dataset.agent));
+    r.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();openAgent(r.dataset.agent);}});
+  });
+}
+
+/* ============ AGENT PANEL ============ */
+const panel = document.getElementById("panel");
+const scrim = document.getElementById("scrim");
+function openAgent(id){
+  const a = AGENTS.find(x=>x.id===id);
+  const srcLabel = a.src==="ms" ? "Microsoft first-party" : "cX Agent Library";
+  const badge = a.src==="ms"
+    ? `<span class="badge ga">${a.status}</span>`
+    : `<span class="badge ${a.tier}">${a.tier==="mc"?"MISSION-CRITICAL":"STANDARD"}</span>`;
+  panel.innerHTML = `
+    <div class="p-head">
+      <button class="p-close" aria-label="Close">✕</button>
+      <div class="p-src ${a.src}"><span class="dot"></span>${srcLabel}</div>
+      <div class="p-name">${a.name}</div>
+      <div class="p-badges">${badge}</div>
+    </div>
+    <div class="p-body">
+      ${mediaBlock(a)}
+      <div class="p-sec"><div class="k">What it does</div><div class="v">${a.does}</div></div>
+      <div class="p-sec"><div class="k">The moment it fires</div><div class="v">${a.moment}</div></div>
+      <div class="p-sec"><div class="k">The signal it reads</div><div class="v">${a.signal}</div></div>
+      <div class="p-kpi"><div class="num">${a.kpi}</div><div class="cap">${a.kcap}</div>
+        <div class="levers">${leverPills(a.id)}</div></div>
+      <div class="p-pair to-${a.pair.dir}">
+        <div class="glyph">⇄</div>
+        <div><div class="t">${a.pair.label}</div><div class="d">${a.pair.text}</div></div>
+      </div>
+    </div>`;
+  panel.querySelector(".p-close").addEventListener("click",closeAgent);
+  const mv = panel.querySelector(".p-media.has-vid");
+  if(mv) mv.addEventListener("click",()=>window.open(mv.dataset.url,"_blank"));
+  const vb = panel.querySelector(".p-vid");
+  if(vb) vb.addEventListener("click",ev=>{ev.stopPropagation();window.open(vb.dataset.url,"_blank");});
+  panel.classList.add("on"); scrim.classList.add("on");
+  panel.querySelector(".p-close").focus();
+}
+function closeAgent(){ panel.classList.remove("on"); scrim.classList.remove("on"); }
+scrim.addEventListener("click",closeAgent);
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape")closeAgent();});
+
+
+/* ============ SCENARIO MODE ============ */
+const SCENARIOS = [
+{stage:"prospects", friction:"Our best-fit accounts are researching us — anonymously",
+ role:"VP of Demand Generation",
+ jtbd:"focus our outbound on accounts that are already in-market",
+ outcome:"hand sales a pipeline they actually want to work",
+ but:"intent is invisible, so targeting runs on opinion — and volume masquerades as coverage",
+ relay:["cx-intent","cx-priority","ms-sales-agent"],
+ endline:"Outreach starts with who's in-market — not who's newest in the list.",
+ proof:"20–50% higher campaign ROI vs broad programs"},
+
+{stage:"leads", friction:"Leads go cold while we chase the wrong ones",
+ role:"Sales Development Leader",
+ jtbd:"qualify every lead the same way — including the long tail no one has time for",
+ outcome:"keep my sellers in conversations with real buyers",
+ but:"reps cherry-pick the obvious ones, and everything else quietly dies untouched",
+ relay:["ms-sqa","cx-leadscore","cx-journey"],
+ endline:"Every lead gets worked, scored, or nurtured — the loop has no exit ramp to nowhere.",
+ proof:"120+ hours saved in three weeks, in one published first-party pilot"},
+
+{stage:"opps", friction:"The deal story and the deal data disagree",
+ role:"Regional Sales Director",
+ jtbd:"know which deals are actually advancing",
+ outcome:"coach the right deal at the right moment — before the forecast call",
+ but:"I hear confidence in reviews and see silence in the record — and I learn which was true on the last day of the quarter",
+ relay:["ms-soa","cx-dealhealth","cx-betweencalls"],
+ endline:"An explainable score on every deal — coached weekly, not discovered quarterly.",
+ proof:"Risk surfaced with driver attribution; the intervention runs the same day"},
+
+{stage:"win", friction:"Legal is the longest stage in our sales cycle",
+ role:"VP of Deal Desk",
+ jtbd:"move every verbal yes to signature without the margin leaking",
+ outcome:"recognize revenue this quarter, not next",
+ but:"redlines sit in a two-week queue while discounts drift to get the deal 'unstuck'",
+ relay:["ms-close","cx-pricing","cx-clm"],
+ endline:"Clean paper, guardrailed pricing, and a close plan that moves in days.",
+ proof:"30–50% faster contracting — with margin held"},
+
+{stage:"onboard", friction:"The handoff after signature is where trust leaks",
+ role:"VP of Customer Success",
+ jtbd:"get every new customer to first value fast",
+ outcome:"start earning the renewal on day one",
+ but:"the promises made in the sale don't survive the handoff — and milestones slip silently",
+ relay:["ms-order","cx-stakemap","cx-adoption"],
+ endline:"Signature flows into a governed plan — and value is verified with telemetry, not decks.",
+ proof:"10–20% more expansion via multi-threading and NRR"},
+
+{stage:"retain", friction:"We find out about churn when the renewal doesn't come",
+ role:"Chief Customer Officer",
+ jtbd:"see risk months before the renewal date",
+ outcome:"save accounts while the intervention is still cheap",
+ but:"health scores decorate dashboards, and service signals never reach the revenue team",
+ relay:["ms-intent","cx-renewal","cx-churn"],
+ endline:"Service signals become revenue signals — and the save play runs before the customer decides.",
+ proof:"10–18% churn reduction where CS acts on it"},
+
+{stage:"expand", friction:"Expansion is opportunistic — a hope, not a motion",
+ role:"Chief Revenue Officer",
+ jtbd:"turn healthy accounts into the next deal, systematically",
+ outcome:"grow NRR without growing headcount",
+ but:"nobody owns the whitespace, and cross-sell triggers die in dashboards",
+ relay:["ms-knowledge","cx-crosssell","cx-expandout","ms-sales-agent"],
+ endline:"The funnel loops back to its own beginning — expansion runs as a motion, not a hope.",
+ proof:"10–30% higher attach rate on triggered plays"}
+];
+
+const scnLaunch = document.getElementById("scnLaunch");
+const scnTiles = document.getElementById("scnTiles");
+const scnBar = document.getElementById("scnBar");
+const scnSentence = document.getElementById("scnSentence");
+const scnNext = document.getElementById("scnNext");
+const scnExit = document.getElementById("scnExit");
+const scnProg = document.getElementById("scnProg");
+const endCard = document.getElementById("endCard");
+const controlsRow = document.querySelector(".controls");
+const scnLayer = el("g",{id:"scnLayer"});
+svg.appendChild(scnLayer);
+
+let scn = null, beat = 0, token = 0;
+
+function dotPos(id){
+  const d = document.querySelector(`.agent-dot[data-agent="${id}"]`);
+  return {x:+d.getAttribute("cx"), y:+d.getAttribute("cy"), el:d};
+}
+function stageCenter(id){
+  const i = STAGES.findIndex(s=>s.id===id);
+  return i*colW + colW/2;
+}
+
+/* ---- tiles ---- */
+scnTiles.innerHTML =
+  `<div class="scn-tiles-head">
+     <div><div class="d-kick">WALK A SCENARIO</div>
+     <div class="scn-ask">Which of these sounds like Monday?</div></div>
+     <button class="scn-back" id="scnTilesBack">← Back to explore</button>
+   </div>
+   <div class="scn-grid">` +
+  SCENARIOS.map((s,i)=>{
+    const st = STAGES.find(x=>x.id===s.stage);
+    return `<button class="scn-tile" data-i="${i}">
+      <span class="scn-fr">"${s.friction}."</span>
+      <span class="scn-st">Stage ${STAGES.indexOf(st)+1} · ${st.n}</span></button>`;
+  }).join("") + `</div>`;
+
+scnLaunch.addEventListener("click",()=>{
+  controlsRow.style.display = "none";
+  detail.classList.remove("open"); closeAgent();
+  scnTiles.classList.add("open");
+  scnTiles.scrollIntoView({behavior:"smooth",block:"start"});
+});
+document.getElementById("scnTilesBack").addEventListener("click",exitScenario);
+scnTiles.querySelectorAll(".scn-tile").forEach(t=>
+  t.addEventListener("click",()=>startScenario(SCENARIOS[+t.dataset.i])));
+
+/* ---- engine ---- */
+function frag(html, cls){ 
+  const s=document.createElement("span"); s.className="frag"+(cls?" "+cls:""); s.innerHTML=html;
+  scnSentence.appendChild(s); requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.add("in")));
+}
+function setProg(n){
+  scnProg.innerHTML = [1,2,3,4].map(i=>`<span class="pg${i<=n?" on":""}"></span>`).join("");
+}
+function startScenario(s){
+  scn = s; beat = 1; token++;
+  scnTiles.classList.remove("open");
+  scnBar.classList.add("open");
+  endCard.classList.remove("open");
+  scnSentence.innerHTML = "";
+  clearScnLayer();
+  svg.classList.remove("dimmed");
+  document.querySelectorAll(".stage-hit").forEach(g=>g.classList.remove("focus","sel"));
+  frag(`I am a <b>${s.role}</b> at Meridian Industrial`);
+  scnNext.textContent = "I need to →";
+  scnNext.style.display = "";
+  setProg(1);
+  scnBar.scrollIntoView({behavior:"smooth",block:"start"});
+}
+scnNext.addEventListener("click",()=>{
+  if(!scn) return;
+  beat++;
+  if(beat===2){
+    frag(`, and I need to ${scn.jtbd}, so I can <b>${scn.outcome}</b>`);
+    svg.classList.add("dimmed");
+    const g = document.querySelector(`.stage-hit[data-stage="${scn.stage}"]`);
+    g.classList.add("focus");
+    scnNext.textContent = "But →"; setProg(2);
+  } else if(beat===3){
+    frag(` — but <b>${scn.but}</b>.`, "amber");
+    drawCrack(scn.stage);
+    scnNext.textContent = "Run the relay →"; setProg(3);
+  } else if(beat===4){
+    scnNext.style.display = "none"; setProg(4);
+    runRelay(scn);
+  }
+});
+scnExit.addEventListener("click",exitScenario);
+
+function clearScnLayer(){ while(scnLayer.firstChild) scnLayer.removeChild(scnLayer.firstChild); }
+
+function drawCrack(stageId){
+  const x = stageCenter(stageId);
+  const seg=[]; let y=TOP+6;
+  let px=x;
+  while(y < H-66){ px = x + (seg.length%2? -7:7); seg.push(`${seg.length?"L":"M"}${px},${y}`); y+=24; }
+  const p = el("path",{d:seg.join(" "),class:"crack"});
+  scnLayer.appendChild(p);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>p.classList.add("in")));
+}
+
+function runRelay(s){
+  const myToken = token;
+  const step = 850;
+  s.relay.forEach((id,i)=>{
+    setTimeout(()=>{
+      if(myToken!==token) return;
+      const d = dotPos(id);
+      d.el.classList.add("lit");
+      const ring = el("circle",{cx:d.x,cy:d.y,r:6,class:"pulse "+(d.el.dataset.src)});
+      scnLayer.appendChild(ring);
+      requestAnimationFrame(()=>ring.classList.add("go"));
+      setTimeout(()=>ring.remove(), 900);
+      if(i>0){
+        const prev = dotPos(s.relay[i-1]);
+        const ln = el("line",{x1:prev.x,y1:prev.y,x2:d.x,y2:d.y,class:"relay-line"});
+        const len = Math.hypot(d.x-prev.x, d.y-prev.y);
+        ln.style.strokeDasharray = len; ln.style.strokeDashoffset = len;
+        scnLayer.appendChild(ln);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>ln.style.strokeDashoffset = 0));
+      }
+    }, i*step);
+  });
+  setTimeout(()=>{
+    if(myToken!==token) return;
+    const crack = scnLayer.querySelector(".crack");
+    if(crack) crack.classList.add("heal");
+    setWings(true);
+    showEndCard(s);
+  }, s.relay.length*step + 500);
+}
+
+function showEndCard(s){
+  const chip = id=>{
+    const a = AGENTS.find(x=>x.id===id);
+    return `<button class="ec-chip ${a.src}" data-agent="${id}">${a.name}</button>`;
+  };
+  endCard.innerHTML = `
+    <div class="d-kick">THE OUTCOME</div>
+    <div class="ec-h">${s.endline}</div>
+    <div class="ec-proof">${s.proof}</div>
+    <div class="ec-levers"><span class="lv-k">This relay moves</span>${scnLeverPills(s.stage)}</div>
+    <div class="ec-relay">${s.relay.map(chip).join('<span class="ec-arr">→</span>')}</div>
+    <div class="ec-note">Blue is Microsoft first-party. Green is the cX Agent Library. The outcome needs the relay — not either one alone.</div>
+    <div class="ec-btns">
+      <button class="ec-b primary" id="ecAnother">Walk another scenario</button>
+      <button class="ec-b" id="ecExplore">Explore the stages</button>
+    </div>`;
+  endCard.classList.add("open");
+  endCard.querySelectorAll(".ec-chip").forEach(c=>
+    c.addEventListener("click",()=>openAgent(c.dataset.agent)));
+  document.getElementById("ecAnother").addEventListener("click",()=>{
+    resetScnVisuals();
+    scnBar.classList.remove("open"); endCard.classList.remove("open");
+    scnTiles.classList.add("open");
+    scnTiles.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  document.getElementById("ecExplore").addEventListener("click",()=>{
+    exitScenario(); openStage(s.stage);
+  });
+  endCard.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function resetScnVisuals(){
+  token++;
+  clearScnLayer();
+  svg.classList.remove("dimmed");
+  document.querySelectorAll(".stage-hit").forEach(g=>g.classList.remove("focus"));
+  document.querySelectorAll(".agent-dot").forEach(d=>d.classList.remove("lit"));
+  setWings(false);
+  scn = null; beat = 0;
+}
+function exitScenario(){
+  resetScnVisuals();
+  scnTiles.classList.remove("open");
+  scnBar.classList.remove("open");
+  endCard.classList.remove("open");
+  controlsRow.style.display = "";
+  applyFilter();
+}
+
+
+/* ============ AGENT MEDIA (animation + demo video plumbing) ============ */
+/* kind: detect (senses & scores) · engage (reaches out & advances) · generate (produces an artifact) */
+const MEDIA = {
+"ms-sales-agent":["engage","Outreach drafted · meeting booked"],
+"ms-sales-research":["detect","Strategic answer delivered"],
+"ms-sqa":["engage","Qualified lead handed off"],
+"ms-soa":["detect","Risk flagged · next action"],
+"ms-close":["detect","Commit risk surfaced"],
+"ms-order":["generate","Order confirmed in D365"],
+"ms-sched":["generate","Schedule rebalanced"],
+"ms-intent":["detect","Intent mapped · routed"],
+"ms-case":["generate","Case resolved · record updated"],
+"ms-knowledge":["generate","Knowledge article published"],
+"cx-intent":["detect","In-market account flagged"],
+"cx-priority":["detect","Ranked target list"],
+"cx-dormant":["engage","Conversation reopened"],
+"cx-journey":["engage","Next-best touch sent"],
+"cx-leadscore":["detect","One trusted score"],
+"cx-research":["generate","Discovery brief ready"],
+"cx-dealhealth":["detect","WinScore + drivers"],
+"cx-meetprep":["generate","Two-minute brief delivered"],
+"cx-betweencalls":["engage","No-ask value touch sent"],
+"cx-pov":["generate","Client-ready POV"],
+"cx-oppconvert":["engage","Close plan advanced"],
+"cx-pricing":["generate","Guardrailed quote out"],
+"cx-clm":["generate","Redlines resolved · routed"],
+"cx-stakemap":["generate","Live success plan stood up"],
+"cx-adoption":["detect","Value verified by telemetry"],
+"cx-cadence":["engage","Owner alerted · client updated"],
+"cx-renewal":["detect","Save playbook triggered"],
+"cx-churn":["detect","Playbook + owner assigned"],
+"cx-dialogue":["detect","Call scored · signals shared"],
+"cx-crosssell":["detect","Expansion trigger routed"],
+"cx-expandout":["engage","Expansion outreach sent"],
+"cx-nba":["detect","One next action per account"]
+};
+
+/* Add demo video URLs here as they're produced; the button lights up automatically. */
+const VIDEOS = {
+/* "cx-dealhealth":"https://…", */
+};
+
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function trunc(s,n){ s=s.trim().replace(/\.$/,""); return s.length>n ? s.slice(0,n-1)+"…" : s; }
+
+function mediaBlock(a){
+  const [kind, act] = MEDIA[a.id] || ["detect", a.one];
+  const col = a.src==="ms" ? "var(--ms)" : "var(--cx)";
+  const soft = a.src==="ms" ? "var(--ms-soft)" : "var(--cx-soft)";
+  const sigs = a.signal.replace(/\.$/,"").split(",").map(s=>s.trim()).filter(Boolean).slice(0,3);
+  const n = sigs.length;
+  const CY = 62;
+  const chipY = i => CY + (i-(n-1)/2)*34 - 11;
+
+  // in chips + paths + particles
+  let ins="", parts="";
+  sigs.forEach((s,i)=>{
+    const y = chipY(i), py = y+11;
+    ins += `<rect x="6" y="${y}" width="128" height="22" rx="11" fill="#fff" stroke="var(--hair)"/>
+      <text x="70" y="${y+14.5}" text-anchor="middle" class="m-sig">${trunc(s,26)}</text>`;
+    const path = `M138,${py} C168,${py} 172,${CY} 196,${CY}`;
+    ins += `<path d="${path}" fill="none" stroke="var(--hair)" stroke-width="1.2"/>`;
+    if(!REDUCED) parts += `<circle r="2.6" fill="${col}" opacity=".85">
+      <animateMotion dur="2.4s" begin="${(i*0.8).toFixed(1)}s" repeatCount="indefinite" path="${path}"/>
+      </circle>`;
+  });
+
+  // center ring + kind glyph
+  let glyph="";
+  if(kind==="detect"){
+    glyph = `<line x1="216" y1="${CY}" x2="216" y2="${CY-13}" stroke="${col}" stroke-width="1.6" stroke-linecap="round">
+      ${REDUCED?"":`<animateTransform attributeName="transform" type="rotate" from="0 216 ${CY}" to="360 216 ${CY}" dur="3.2s" repeatCount="indefinite"/>`}</line>
+      <circle cx="216" cy="${CY}" r="2.2" fill="${col}"/>`;
+  } else if(kind==="engage"){
+    glyph = `<path d="M209,${CY+6} L225,${CY} L209,${CY-6} L212.5,${CY} Z" fill="${col}"/>`;
+  } else {
+    glyph = `<rect x="209" y="${CY-9}" width="14" height="18" rx="2.5" fill="none" stroke="${col}" stroke-width="1.6"/>
+      <line x1="212.5" y1="${CY-3.5}" x2="219.5" y2="${CY-3.5}" stroke="${col}" stroke-width="1.4"/>
+      <line x1="212.5" y1="${CY+1}" x2="219.5" y2="${CY+1}" stroke="${col}" stroke-width="1.4"/>
+      <line x1="212.5" y1="${CY+5.5}" x2="217" y2="${CY+5.5}" stroke="${col}" stroke-width="1.4"/>`;
+  }
+  const ring = `<circle cx="216" cy="${CY}" r="21" fill="${soft}" stroke="${col}" stroke-width="1.8"/>
+    ${REDUCED?"":`<circle cx="216" cy="${CY}" r="21" fill="none" stroke="${col}" stroke-width="1.5" opacity=".7">
+      <animate attributeName="r" from="21" to="33" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" from=".55" to="0" dur="2.2s" repeatCount="indefinite"/></circle>`}
+    ${glyph}`;
+
+  // out path + particle + action chip
+  const outPath = `M239,${CY} L268,${CY}`;
+  const outPart = REDUCED?"" : (kind==="generate"
+    ? `<rect width="6" height="7.5" rx="1" fill="${col}" opacity=".9">
+        <animateMotion dur="1.7s" begin=".4s" repeatCount="indefinite" path="M236,${CY-3.7} L265,${CY-3.7}"/></rect>`
+    : `<circle r="3" fill="${col}">
+        <animateMotion dur="1.7s" begin=".4s" repeatCount="indefinite" path="${outPath}"/></circle>`);
+  const out = `<path d="${outPath}" fill="none" stroke="var(--hair)" stroke-width="1.2"/>
+    <path d="M264,${CY-4} L270,${CY} L264,${CY+4}" fill="none" stroke="var(--quiet)" stroke-width="1.2" stroke-linecap="round"/>
+    ${outPart}
+    <rect x="276" y="${CY-13}" width="138" height="26" rx="13" fill="${col}"/>
+    <text x="345" y="${CY+3.5}" text-anchor="middle" class="m-act">${trunc(act,28)}</text>`;
+
+  const kindLabel = kind==="detect" ? "Senses & scores" : kind==="engage" ? "Reaches out & advances" : "Produces the artifact";
+  const vid = VIDEOS[a.id];
+  const demo = vid
+    ? `<button class="p-vid" data-url="${vid}">▶&nbsp; Watch the demo</button>`
+    : `<span class="p-vid-soon">▶&nbsp; Demo coming soon</span>`;
+
+  return `<div class="p-media${vid?" has-vid":""}" ${vid?`data-url="${vid}"`:""} title="${vid?"Watch the demo":""}">
+    <svg viewBox="0 0 420 124" xmlns="http://www.w3.org/2000/svg" aria-label="How ${a.name} works">
+      ${ins}${parts}${ring}${out}
+    </svg>
+    <div class="m-foot"><span class="m-kind">${kindLabel}</span>${demo}</div>
+  </div>`;
+}
+
+
+
+/* ============ REVENUE LEVERS (Volume · Conversion · Velocity) ============ */
+/* [primary, secondary] — the two levers each agent moves most. Dialogue Copilot feeds all three. */
+const LEVERS = {
+"ms-sales-agent":["vol","vel"], "ms-sales-research":["vol","con"],
+"ms-sqa":["vol","vel"], "ms-soa":["con","vel"], "ms-close":["vel","con"],
+"ms-order":["vel","con"], "ms-sched":["vel","con"],
+"ms-intent":["vel","con"], "ms-case":["vel","con"], "ms-knowledge":["vel","con"],
+"cx-intent":["vol","con"], "cx-priority":["con","vel"], "cx-dormant":["vol","con"],
+"cx-journey":["con","vol"], "cx-leadscore":["con","vel"], "cx-research":["con","vel"],
+"cx-dealhealth":["con","vel"], "cx-meetprep":["vel","con"], "cx-betweencalls":["vel","con"],
+"cx-pov":["vel","con"], "cx-oppconvert":["vel","con"], "cx-pricing":["con","vel"],
+"cx-clm":["vel","con"], "cx-stakemap":["con","vel"], "cx-adoption":["con","vel"],
+"cx-cadence":["vel","con"], "cx-renewal":["con","vel"], "cx-churn":["con","vel"],
+"cx-dialogue":["vol","con","vel"],
+"cx-crosssell":["vol","con"], "cx-expandout":["con","vol"], "cx-nba":["con","vel"]
+};
+const LV_NAMES = {vol:"Volume", con:"Conversion", vel:"Velocity"};
+
+function leverPills(id, compact){
+  const lv = LEVERS[id] || [];
+  const all = lv.length === 3;
+  const pills = ["vol","con","vel"].map(k=>{
+    const cls = all ? "pri" : (lv[0]===k ? "pri" : lv[1]===k ? "sec" : "off");
+    return `<span class="lv ${cls}">${LV_NAMES[k]}</span>`;
+  }).join("");
+  return `${compact?"":'<span class="lv-k">Moves</span>'}${pills}`;
+}
+
+/* net levers per scenario relay, keyed by stage */
+const SCN_LEVERS = {
+prospects:["vol","con"], leads:["vol","con"], opps:["con","vel"], win:["vel","con"],
+onboard:["vel","con"], retain:["con","vel"], expand:["vol","con"]
+};
+function scnLeverPills(stage){
+  const lv = SCN_LEVERS[stage] || [];
+  return ["vol","con","vel"].map(k=>{
+    const cls = lv[0]===k ? "pri" : lv[1]===k ? "sec" : "off";
+    return `<span class="lv ${cls}">${LV_NAMES[k]}</span>`;
+  }).join("");
+}
+
+</script>
+</body>
+</html>
