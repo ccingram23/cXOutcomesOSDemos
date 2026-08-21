@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cX RevOS — Nonprofit Constituent Bowtie V1</title>
+  <meta name="description" content="Interactive nonprofit constituent lifecycle bowtie demo for a federated national impact network." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --card-soft: #fafbfc;
+      --ink: #172230;
+      --ink-2: #475467;
+      --ink-3: #8a94a3;
+      --line: #e3e8ee;
+      --line-soft: #eef1f4;
+      --cx: #9ad926;
+      --cx-dark: #5d8d08;
+      --blue: #0f6cbd;
+      --blue-dark: #0b5a9e;
+      --navy: #0a1f33;
+      --good: #12805c;
+      --good-bg: #e8f5ef;
+      --warn: #b54708;
+      --warn-bg: #fff4e7;
+      --bad: #b42318;
+      --bad-bg: #fff0ef;
+      --neutral: #667085;
+      --neutral-bg: #f2f4f7;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 1px 2px rgba(16,24,40,.05), 0 2px 7px rgba(16,24,40,.05);
+      --shadow-card: 0 1px 2px rgba(16,24,40,.04), 0 7px 20px rgba(16,24,40,.06);
+      --appbar-h: 48px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    [hidden] { display: none !important; }
+
+    /* ---------- Dynamics-style host shell ---------- */
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .appbar {
+      height: var(--appbar-h);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 10px 0 7px;
+      background: var(--navy);
+      color: #edf4fb;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+    .waffle-btn {
+      width: 36px; height: 36px; border: 0; border-radius: 5px;
+      display: grid; place-items: center; background: transparent; cursor: pointer;
+    }
+    .waffle-btn:hover { background: rgba(255,255,255,.10); }
+    .waffle { display: grid; grid-template-columns: repeat(3, 3px); gap: 2px; }
+    .waffle i { width: 3px; height: 3px; border-radius: 1px; background: #cedae7; }
+    .appbar-brand { font-size: 14px; font-weight: 600; }
+    .appbar-divider { width: 1px; height: 22px; background: #2c435b; }
+    .appbar-area { color: #cbd7e4; font-size: 13px; }
+    .appbar-search {
+      height: 32px; max-width: 520px; flex: 1; margin: 0 auto;
+      border: 1px solid #284058; border-radius: 4px; background: #13283f;
+      color: #91a5ba; display: flex; align-items: center; gap: 8px; padding: 0 10px;
+    }
+    .search-icon { width: 13px; height: 13px; border: 1.7px solid currentColor; border-radius: 50%; position: relative; }
+    .search-icon:after { content: ""; position: absolute; width: 6px; height: 1.7px; background: currentColor; transform: rotate(45deg); right: -5px; bottom: -2px; border-radius: 2px; }
+    .appbar-actions { display: flex; align-items: center; gap: 3px; }
+    .appbar-icon {
+      width: 32px; height: 32px; border: 0; border-radius: 4px;
+      background: transparent; color: #dce7f2; cursor: pointer;
+    }
+    .appbar-icon:hover { background: rgba(255,255,255,.10); }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%; margin-left: 7px;
+      background: #6f5aa8; color: white; display: grid; place-items: center;
+      font-size: 10px; font-weight: 700;
+    }
+
+    .shell-body { display: flex; min-height: calc(100vh - var(--appbar-h)); }
+    .rail {
+      width: 220px; flex: 0 0 220px; padding: 7px 0 18px;
+      background: #f7f7f7; border-right: 1px solid #e1e4e8; color: #2a2a2a;
+      position: sticky; top: var(--appbar-h); height: calc(100vh - var(--appbar-h));
+      overflow: auto;
+    }
+    .rail-collapse {
+      border: 0; background: transparent; width: 36px; height: 34px; margin: 0 8px 3px;
+      border-radius: 4px; cursor: pointer; font-size: 18px;
+    }
+    .rail-collapse:hover { background: #ebebeb; }
+    .rail-group { padding: 13px 14px 4px; font-size: 10px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .06em; }
+    .rail-item {
+      min-height: 36px; padding: 8px 13px 8px 12px; border-left: 3px solid transparent;
+      display: flex; align-items: center; gap: 10px; cursor: pointer; color: #262626;
+    }
+    .rail-item:hover { background: #ececec; }
+    .rail-item.active { background: #e8eff7; border-left-color: var(--blue); font-weight: 600; }
+    .rail-icon { width: 17px; text-align: center; color: #555; }
+    .rail-item.active .rail-icon { color: var(--blue); }
+    .rail-area { margin-top: 15px; border-top: 1px solid #e1e1e1; padding: 12px 14px 0; font-weight: 600; display: flex; justify-content: space-between; }
+
+    .workspace { min-width: 0; flex: 1; }
+    .cmdbar {
+      height: 48px; padding: 0 18px; background: white; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 9px; position: sticky; top: var(--appbar-h); z-index: 40;
+    }
+    .app-icon {
+      width: 25px; height: 25px; border-radius: 6px;
+      background: linear-gradient(135deg, var(--blue), #35a4dc);
+      color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800;
+    }
+    .cmd-name { font-size: 14px; font-weight: 700; }
+    .cmd-spacer { flex: 1; }
+    .role-select {
+      border: 1px solid var(--line); background: #fff; border-radius: 4px;
+      padding: 6px 10px; color: var(--ink-2); font-size: 12px;
+    }
+    .role-select b { color: var(--ink); }
+    .cmd-btn {
+      border: 0; background: var(--blue); color: #fff; border-radius: 4px;
+      padding: 7px 13px; font-weight: 600; cursor: pointer;
+    }
+    .cmd-btn:hover { background: var(--blue-dark); }
+    .cmd-btn.secondary { background: white; color: var(--ink-2); border: 1px solid var(--line); }
+    .cmd-btn.secondary:hover { background: var(--card-soft); color: var(--ink); }
+
+    .workspace-head { padding: 20px 24px 0; }
+    .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .title-wrap h1 { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: -.02em; }
+    .title-wrap p { margin: 3px 0 0; color: var(--ink-2); font-size: 13px; }
+    .demo-badge {
+      display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px;
+      border-radius: 99px; border: 1px solid #dbe7c6; background: #f5faeb;
+      color: #536c1c; font-size: 11px; font-weight: 600;
+    }
+    .demo-badge:before { content:""; width: 7px; height: 7px; border-radius: 50%; background: var(--cx); }
+    .meta-chips { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 14px; }
+    .meta-chip {
+      background: white; border: 1px solid var(--line); border-radius: 99px;
+      padding: 5px 11px; color: var(--ink-2); font-size: 10.5px;
+    }
+    .meta-chip b { color: var(--ink); }
+    .setup-link { color: var(--blue); font-weight: 600; cursor: pointer; border: 0; background: transparent; padding: 5px 2px; }
+    .setup-link:hover { text-decoration: underline; }
+    .mode-tabs { margin-top: 17px; border-bottom: 1px solid var(--line); display: flex; gap: 22px; }
+    .mode-tab {
+      border: 0; background: transparent; padding: 0 2px 11px; margin-bottom: -1px;
+      border-bottom: 2px solid transparent; color: var(--ink-3); font-weight: 600; cursor: pointer;
+    }
+    .mode-tab:hover { color: var(--ink-2); }
+    .mode-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    .workspace-body { padding: 18px 24px 60px; }
+    .view { display: flex; flex-direction: column; gap: 18px; }
+    .panel {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px 22px; box-shadow: var(--shadow-card);
+    }
+    .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .panel-head h2 { margin: 0; font-size: 15px; letter-spacing: -.01em; }
+    .panel-sub { margin: 3px 0 0; color: var(--ink-2); font-size: 12px; }
+    .muted { color: var(--ink-3); }
+    .eyebrow { font-size: 9.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; }
+
+    /* ---------- Executive KPI row ---------- */
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 11px; }
+    .kpi-card {
+      border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 13px 14px;
+      background: linear-gradient(180deg,#fff,#fcfdfe);
+    }
+    .kpi-label { color: var(--ink-3); font-size: 9.5px; text-transform: uppercase; letter-spacing: .055em; min-height: 28px; }
+    .kpi-value { margin-top: 5px; font-size: 22px; font-weight: 700; letter-spacing: -.025em; }
+    .kpi-foot { margin-top: 3px; color: var(--ink-2); font-size: 10.5px; }
+    .trend { font-weight: 700; }
+    .trend.good { color: var(--good); }
+    .trend.warn { color: var(--warn); }
+    .trend.bad { color: var(--bad); }
+
+    /* ---------- Scenario lenses ---------- */
+    .lens-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 15px; }
+    .lens {
+      border: 1px solid var(--line); border-radius: var(--radius-sm); background: white;
+      padding: 12px 13px; cursor: pointer; text-align: left; transition: .16s ease;
+      position: relative; overflow: hidden;
+    }
+    .lens:before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--line); }
+    .lens:hover { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+    .lens.active { border-color: #bed7ee; background:#f8fbff; }
+    .lens.active:before { background:var(--blue); }
+    .lens-title { font-weight: 700; font-size: 12.5px; }
+    .lens-sub { color: var(--ink-2); margin-top: 2px; font-size: 10.5px; }
+    .lens-stat { margin-top: 7px; display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+    .lens-stat b { font-size: 13px; }
+    .lens-stat span { color: var(--ink-3); font-size: 9.5px; }
+
+    /* ---------- Bowtie ---------- */
+    .legend { display: flex; gap: 14px; align-items: center; color: var(--ink-2); font-size: 10.5px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .dot.good, .health.good { background: var(--good); }
+    .dot.warn, .health.warn { background: var(--warn); }
+    .dot.bad, .health.bad { background: var(--bad); }
+    .axis { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 8px 7px; color: var(--ink-3); font-size: 9px; text-transform: uppercase; letter-spacing: .09em; }
+    .axis span:last-child { text-align: right; }
+    .axis .center { color: var(--ink-2); font-weight: 700; text-align:center; }
+    .bowtie-scroll { overflow-x: auto; padding-bottom: 2px; }
+    .bowtie-canvas { position: relative; min-width: 1120px; height: 410px; }
+    .bowtie-band { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    .stage-grid {
+      position: absolute; inset: 0; z-index: 2; display: grid;
+      grid-template-columns: repeat(7, minmax(142px,1fr)); gap: 10px; align-items: center; padding: 0 11px;
+    }
+    .stage-card {
+      height: 226px; border: 1px solid var(--line); border-radius: 11px; background: white;
+      box-shadow: var(--shadow-card); padding: 12px; display: flex; flex-direction: column;
+      cursor: pointer; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      outline: none; position: relative;
+    }
+    .stage-card:hover, .stage-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(16,24,40,.14); }
+    .stage-card.active-zone { border-color: #b8d4eb; box-shadow: 0 1px 2px rgba(16,24,40,.04), 0 0 0 2px rgba(15,108,189,.08), 0 8px 20px rgba(16,24,40,.07); }
+    .stage-card.waist { border-color: #b8c1cc; box-shadow: 0 3px 9px rgba(16,24,40,.09), 0 15px 32px rgba(16,24,40,.11); }
+    .stage-card.waist:after {
+      content:"KNOT"; position:absolute; top:-25px; left:50%; transform:translateX(-50%);
+      padding:3px 9px; border-radius:99px; background:var(--ink); color:white; font-size:8.5px; font-weight:700; letter-spacing:.08em;
+    }
+    .stage-top { display:flex; align-items:center; justify-content:space-between; gap:7px; }
+    .stage-num { width:22px; height:22px; border-radius:7px; background:var(--neutral-bg); color:var(--ink-2); display:grid; place-items:center; font-size:9px; font-weight:700; }
+    .health { width:9px; height:9px; border-radius:50%; }
+    .stage-name { margin-top:7px; font-size:12px; font-weight:700; min-height:35px; line-height:1.25; }
+    .stage-count { font-size:23px; font-weight:800; letter-spacing:-.03em; line-height:1; }
+    .stage-unit { margin-top:3px; color:var(--ink-3); font-size:9.5px; min-height:28px; }
+    .ring-row { margin-top:7px; display:flex; align-items:center; gap:9px; }
+    .mini-ring { width:48px; height:48px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; }
+    .mini-ring-in { width:36px; height:36px; border-radius:50%; background:white; display:grid; place-items:center; font-weight:800; font-size:11px; }
+    .attain-copy { font-size:9.5px; color:var(--ink-3); line-height:1.35; }
+    .attain-copy b { color:var(--ink); display:block; font-size:11px; }
+    .stage-metrics { margin-top:auto; padding-top:8px; border-top:1px solid var(--line-soft); display:flex; flex-direction:column; gap:3px; }
+    .stage-metric { display:flex; justify-content:space-between; gap:5px; font-size:9.5px; }
+    .stage-metric span { color:var(--ink-3); }
+    .stage-metric b { color:var(--ink-2); font-weight:600; }
+    .stage-chip {
+      margin-top:7px; border:1px solid var(--line); background:var(--card-soft); border-radius:99px;
+      padding:3px 7px; font-size:8.5px; font-weight:600; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .bowtie-note { margin:12px 2px 0; max-width:850px; color:var(--ink-2); font-size:10.5px; line-height:1.55; }
+
+    /* ---------- Sprints ---------- */
+    .sprint-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .sprint-card { border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .sprint-head { display:flex; justify-content:space-between; align-items:flex-start; gap:9px; }
+    .sprint-name { font-weight:700; font-size:12px; line-height:1.3; }
+    .pill { border-radius:99px; padding:3px 8px; font-size:8.5px; font-weight:700; white-space:nowrap; }
+    .pill.good { background:var(--good-bg); color:var(--good); }
+    .pill.warn { background:var(--warn-bg); color:var(--warn); }
+    .pill.bad { background:var(--bad-bg); color:var(--bad); }
+    .pill.neutral { background:var(--neutral-bg); color:var(--neutral); }
+    .sprint-stage { color:var(--ink-2); font-size:9.5px; }
+    .sprint-stage b { color:var(--ink); }
+    .sprint-metric { color:var(--ink-2); font-size:10px; min-height:29px; }
+    .sprint-prog { display:flex; align-items:flex-end; gap:8px; }
+    .sprint-val { text-align:center; }
+    .sprint-val b { display:block; font-size:14px; }
+    .sprint-val span { display:block; font-size:7.8px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; }
+    .arrow { color:var(--ink-3); padding-bottom:8px; }
+    .progress { height:5px; background:var(--line-soft); border-radius:99px; overflow:hidden; }
+    .progress span { display:block; height:100%; border-radius:99px; background:var(--neutral); }
+    .sprint-foot { border-top:1px solid var(--line-soft); padding-top:8px; display:flex; justify-content:space-between; color:var(--ink-3); font-size:9px; }
+
+    /* ---------- Ledger ---------- */
+    .seg { display:inline-flex; gap:2px; padding:3px; border:1px solid var(--line); border-radius:9px; background:var(--card-soft); flex-wrap:wrap; }
+    .seg-btn { border:0; background:transparent; padding:6px 10px; border-radius:6px; color:var(--ink-2); cursor:pointer; font-size:10px; font-weight:600; }
+    .seg-btn.active { background:white; color:var(--ink); box-shadow:var(--shadow); }
+    .filter-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:12px 0 13px; }
+    .filter-btn { border:1px solid var(--line); border-radius:99px; padding:5px 9px; background:white; color:var(--ink-2); cursor:pointer; font-size:9px; }
+    .filter-btn.active { border-color:#bcd6ed; background:#f3f8fd; color:var(--blue); font-weight:600; }
+    .table-wrap { border:1px solid var(--line); border-radius:var(--radius-sm); overflow:auto; }
+    table { width:100%; border-collapse:collapse; min-width:900px; }
+    th, td { padding:10px 12px; border-bottom:1px solid var(--line-soft); text-align:left; vertical-align:top; }
+    th { background:var(--card-soft); color:var(--ink-3); font-size:8px; text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+    td { font-size:9.5px; color:var(--ink-2); }
+    tbody tr:last-child td { border-bottom:0; }
+    .td-name { color:var(--ink); font-weight:600; min-width:170px; }
+    .td-sub { display:block; margin-top:2px; color:var(--ink-3); font-size:8.5px; }
+    .type-tag { display:inline-block; border-radius:99px; background:var(--neutral-bg); padding:3px 7px; color:var(--ink-2); font-size:8px; font-weight:600; }
+
+    /* ---------- Evidence timeline ---------- */
+    .evidence-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+    .summary-box { border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
+    .summary-box span { color:var(--ink-3); font-size:8.5px; text-transform:uppercase; letter-spacing:.05em; }
+    .summary-box b { display:block; margin-top:3px; font-size:12px; }
+    .timeline { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); position:relative; gap:8px; }
+    .timeline:before { content:""; position:absolute; top:12px; left:7%; right:7%; height:2px; background:var(--line); z-index:0; }
+    .ev-step { position:relative; z-index:1; text-align:center; }
+    .ev-dot { width:25px; height:25px; border-radius:50%; margin:0 auto 7px; display:grid; place-items:center; background:white; border:2px solid var(--line); font-size:7.5px; font-weight:700; }
+    .ev-step.done .ev-dot { border-color:var(--good); color:var(--good); background:var(--good-bg); }
+    .ev-step.current .ev-dot { border-color:var(--blue); color:var(--blue); background:#eef6fd; box-shadow:0 0 0 4px rgba(15,108,189,.08); }
+    .ev-label { font-size:8.5px; font-weight:600; }
+    .ev-copy { margin-top:2px; color:var(--ink-3); font-size:7.8px; }
+
+    /* ---------- Setup & Trust ---------- */
+    .setup-grid { display:grid; grid-template-columns:220px 1fr; gap:16px; }
+    .score-card { border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--card-soft); padding:18px; text-align:center; }
+    .readiness-ring { width:126px; height:126px; border-radius:50%; margin:0 auto 13px; display:grid; place-items:center; background:conic-gradient(var(--good) 0 309.6deg,var(--line) 309.6deg); }
+    .readiness-in { width:98px; height:98px; border-radius:50%; background:var(--card-soft); display:grid; place-items:center; }
+    .readiness-num { font-size:29px; font-weight:800; line-height:1; }
+    .readiness-cap { font-size:8px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em; }
+    .score-line { display:flex; justify-content:space-between; padding:3px 0; color:var(--ink-2); font-size:9.5px; }
+    .score-line b { color:var(--ink); }
+    .setup-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; align-content:start; }
+    .setup-kpi { border:1px solid var(--line); border-radius:9px; padding:12px; background:white; }
+    .setup-kpi span { color:var(--ink-3); font-size:8px; text-transform:uppercase; letter-spacing:.05em; }
+    .setup-kpi b { display:block; margin-top:4px; font-size:17px; }
+    .validation-table .bar { width:100px; height:5px; background:var(--line-soft); border-radius:99px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:7px; }
+    .validation-table .bar i { display:block; height:100%; border-radius:99px; }
+    .mapping-grid { display:grid; grid-template-columns:repeat(7,minmax(120px,1fr)); gap:8px; overflow:auto; padding-bottom:3px; }
+    .map-card { border:1px solid var(--line); border-radius:9px; padding:10px; min-height:137px; }
+    .map-card h4 { margin:0 0 6px; font-size:10px; }
+    .map-card p { margin:3px 0; color:var(--ink-2); font-size:8.5px; }
+    .map-card p b { color:var(--ink); }
+
+    /* ---------- Flyout ---------- */
+    .scrim {
+      position:fixed; inset:var(--appbar-h) 0 0 0; background:rgba(16,24,40,.34);
+      z-index:70; opacity:0; visibility:hidden; transition:opacity .2s ease;
+    }
+    .scrim.open { opacity:1; visibility:visible; }
+    .flyout {
+      position:fixed; top:var(--appbar-h); right:0; width:520px; max-width:94vw;
+      height:calc(100vh - var(--appbar-h)); background:white; z-index:71;
+      transform:translateX(100%); transition:transform .25s ease; box-shadow:-12px 0 36px rgba(16,24,40,.22);
+      display:flex; flex-direction:column;
+    }
+    .flyout.open { transform:translateX(0); }
+    .fly-head { padding:17px 19px 13px; border-bottom:1px solid var(--line); }
+    .fly-head-row { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .fly-title { font-size:17px; font-weight:700; }
+    .fly-close { border:0; background:transparent; width:30px; height:30px; border-radius:5px; cursor:pointer; font-size:22px; line-height:1; color:var(--ink-2); }
+    .fly-close:hover { background:var(--neutral-bg); }
+    .fly-context { margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; color:var(--ink-3); font-size:9px; }
+    .ctx { border:1px solid var(--line); border-radius:99px; padding:3px 7px; }
+    .fly-body { padding:16px 19px 28px; overflow:auto; display:flex; flex-direction:column; gap:14px; }
+    .fly-section { border:1px solid var(--line); border-radius:10px; padding:13px; }
+    .fly-section h3 { margin:0 0 9px; font-size:11px; }
+    .hero-diagnosis { display:grid; grid-template-columns:110px 1fr; gap:13px; align-items:center; }
+    .score-ring { width:100px; height:100px; border-radius:50%; display:grid; place-items:center; margin:auto; }
+    .score-ring-in { width:76px; height:76px; border-radius:50%; background:white; display:grid; place-items:center; text-align:center; }
+    .score-ring-in b { font-size:24px; line-height:1; }
+    .score-ring-in span { color:var(--ink-3); font-size:7px; text-transform:uppercase; letter-spacing:.05em; }
+    .hero-copy h2 { margin:0; font-size:13px; }
+    .hero-copy p { margin:5px 0 0; color:var(--ink-2); font-size:9.5px; line-height:1.55; }
+    .hero-copy .agent { margin-top:7px; color:var(--blue); font-weight:600; font-size:9px; }
+    .rca-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .rca { border:1px solid var(--line); border-radius:8px; padding:9px; background:var(--card-soft); }
+    .rca-label { color:var(--ink-3); font-size:7.8px; text-transform:uppercase; letter-spacing:.04em; min-height:22px; }
+    .rca-value { margin-top:3px; font-size:14px; font-weight:700; }
+    .rca-delta { margin-top:2px; font-size:8px; font-weight:600; }
+    .rca-delta.good { color:var(--good); }
+    .rca-delta.warn { color:var(--warn); }
+    .rca-delta.bad { color:var(--bad); }
+    .coverage-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+    .coverage-item { display:flex; align-items:center; gap:7px; border:1px solid var(--line-soft); border-radius:7px; padding:7px 8px; font-size:8.5px; }
+    .check { width:14px; height:14px; border-radius:50%; display:grid; place-items:center; font-size:8px; font-weight:800; flex-shrink:0; }
+    .check.yes { background:var(--good-bg); color:var(--good); }
+    .check.no { background:var(--bad-bg); color:var(--bad); }
+    .driver-columns { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .driver-col h4 { margin:0 0 6px; font-size:8px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.05em; }
+    .driver { border-radius:7px; padding:8px; margin-bottom:6px; font-size:8.5px; line-height:1.45; }
+    .driver.pos { background:var(--good-bg); }
+    .driver.neg { background:var(--bad-bg); }
+    .driver b { display:block; color:var(--ink); }
+    .solution-head { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .solution-head p { margin:2px 0 0; color:var(--ink-3); font-size:8px; }
+    .solution-metrics { display:flex; gap:7px; flex-wrap:wrap; }
+    .solution-metric { border:1px solid var(--line); border-radius:7px; padding:5px 7px; font-size:7.5px; color:var(--ink-3); }
+    .solution-metric b { color:var(--ink); display:block; font-size:9px; }
+    .solution-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 0; border-top:1px solid var(--line-soft); }
+    .solution-item:first-of-type { border-top:0; }
+    .solution-name { font-size:8.8px; font-weight:600; }
+    .solution-type { color:var(--ink-3); font-size:7.7px; }
+    .recommend-btn {
+      width:100%; border:0; border-radius:8px; padding:10px 12px; background:var(--blue);
+      color:white; font-weight:600; cursor:pointer; font-size:10px;
+    }
+    .recommend-btn:hover { background:var(--blue-dark); }
+
+    /* ---------- Intervention drawer ---------- */
+    .intv-scrim { z-index:80; }
+    .intv-drawer {
+      position:fixed; top:var(--appbar-h); right:0; width:450px; max-width:92vw;
+      height:calc(100vh - var(--appbar-h)); background:white; z-index:81;
+      transform:translateX(100%); transition:transform .25s ease; box-shadow:-12px 0 36px rgba(16,24,40,.26);
+      display:flex; flex-direction:column;
+    }
+    .intv-drawer.open { transform:translateX(0); }
+    .intv-head { padding:17px 19px 13px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+    .intv-title { font-size:15px; font-weight:700; }
+    .intv-body { padding:17px 19px; overflow:auto; flex:1; }
+    .intv-body section { margin-bottom:18px; }
+    .intv-body h4 { margin:0 0 7px; color:var(--ink-3); font-size:8px; text-transform:uppercase; letter-spacing:.06em; }
+    .intv-body p, .intv-body li { color:var(--ink-2); font-size:9.5px; line-height:1.55; }
+    .intv-body p { margin:0 0 8px; }
+    .intv-body b { color:var(--ink); }
+    .intv-action-title { font-size:12px !important; color:var(--ink) !important; font-weight:700; }
+    .intv-body ul { margin:0; padding-left:17px; }
+    .playbook { border:1px solid #cfe1f1; background:#f5faff; border-radius:9px; padding:10px; }
+    .play-step { display:flex; gap:8px; padding:6px 0; border-bottom:1px solid #deebf6; }
+    .play-step:last-child { border-bottom:0; }
+    .play-num { width:20px; height:20px; border-radius:6px; background:var(--blue); color:white; display:grid; place-items:center; font-size:8px; font-weight:700; flex-shrink:0; }
+    .play-copy b { display:block; font-size:9px; }
+    .play-copy span { color:var(--ink-2); font-size:8px; }
+    .intv-foot { padding:13px 19px; border-top:1px solid var(--line); display:flex; justify-content:flex-end; gap:8px; }
+    .intv-btn { border-radius:7px; padding:8px 11px; cursor:pointer; font-size:9px; font-weight:600; }
+    .intv-btn.ghost { border:1px solid var(--line); background:white; }
+    .intv-btn.primary { border:0; background:var(--blue); color:white; }
+    .intv-success { margin:13px 19px; padding:11px; border-radius:9px; background:var(--good-bg); color:var(--good); font-size:9px; line-height:1.5; font-weight:600; }
+
+    .toast {
+      position:fixed; left:50%; bottom:24px; transform:translate(-50%,20px);
+      background:var(--ink); color:white; border-radius:9px; padding:10px 13px;
+      z-index:100; opacity:0; visibility:hidden; transition:.2s ease; box-shadow:0 8px 26px rgba(16,24,40,.25);
+      font-size:9.5px;
+    }
+    .toast.show { opacity:1; visibility:visible; transform:translate(-50%,0); }
+
+    @media (max-width: 1050px) {
+      .rail { display:none; }
+      .kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width: 820px) {
+      .appbar-search { display:none; }
+      .kpi-grid, .lens-row, .sprint-grid, .evidence-summary { grid-template-columns:1fr; }
+      .setup-grid { grid-template-columns:1fr; }
+      .setup-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .timeline { grid-template-columns:repeat(3,1fr); row-gap:14px; }
+      .timeline:before { display:none; }
+      .workspace-head, .workspace-body { padding-left:14px; padding-right:14px; }
+      .cmdbar { padding:0 10px; }
+      .role-select { display:none; }
+    }
+    @media (max-width: 520px) {
+      .kpi-grid, .setup-kpis { grid-template-columns:1fr; }
+      .hero-diagnosis, .rca-grid, .driver-columns, .coverage-list { grid-template-columns:1fr; }
+      .flyout { width:100vw; max-width:100vw; }
+      .appbar-area, .appbar-divider { display:none; }
+      .title-wrap h1 { font-size:19px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="appbar">
+    <button class="waffle-btn" aria-label="App launcher"><span class="waffle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></button>
+    <span class="appbar-brand">Dynamics 365</span>
+    <span class="appbar-divider"></span>
+    <span class="appbar-area">Nonprofit Operations</span>
+    <div class="appbar-search"><span class="search-icon"></span><span>Search constituents, programs, partners, and activities</span></div>
+    <div class="appbar-actions">
+      <button class="appbar-icon" title="Notifications">◌</button>
+      <button class="appbar-icon" title="Settings">⚙</button>
+      <button class="appbar-icon" title="Help">?</button>
+      <span class="avatar">CI</span>
+    </div>
+  </header>
+
+  <div class="shell-body">
+    <nav class="rail" aria-label="Primary navigation">
+      <button class="rail-collapse" title="Collapse navigation">☰</button>
+      <div class="rail-item"><span class="rail-icon">⌂</span>Home</div>
+      <div class="rail-item"><span class="rail-icon">◷</span>Recent</div>
+      <div class="rail-item"><span class="rail-icon">☆</span>Pinned</div>
+      <div class="rail-group">My work</div>
+      <div class="rail-item"><span class="rail-icon">✦</span>Copilot</div>
+      <div class="rail-item"><span class="rail-icon">◫</span>Activities</div>
+      <div class="rail-item"><span class="rail-icon">▦</span>Dashboards</div>
+      <div class="rail-item active"><span class="rail-icon">cX</span>cX RevOS</div>
+      <div class="rail-group">Constituents</div>
+      <div class="rail-item"><span class="rail-icon">◎</span>Constituents</div>
+      <div class="rail-item"><span class="rail-icon">◇</span>Households</div>
+      <div class="rail-item"><span class="rail-icon">♙</span>Partner organizations</div>
+      <div class="rail-group">Engagement</div>
+      <div class="rail-item"><span class="rail-icon">◈</span>Campaigns</div>
+      <div class="rail-item"><span class="rail-icon">▤</span>Applications</div>
+      <div class="rail-item"><span class="rail-icon">⌁</span>Service opportunities</div>
+      <div class="rail-item"><span class="rail-icon">✓</span>Service records</div>
+      <div class="rail-item"><span class="rail-icon">↗</span>Pathways</div>
+      <div class="rail-area"><span>Nonprofit</span><span>⌃</span></div>
+    </nav>
+
+    <main class="workspace">
+      <div class="cmdbar">
+        <div class="app-icon">cX</div>
+        <div class="cmd-name">cX RevOS</div>
+        <div class="cmd-spacer"></div>
+        <button class="role-select">Function: <b>Constituent Strategy Leader</b> ▾</button>
+        <button class="cmd-btn secondary" id="resetDemo">Reset demo</button>
+        <button class="cmd-btn" id="sampleDataBtn">Use sample data</button>
+      </div>
+
+      <section class="workspace-head">
+        <div class="title-row">
+          <div class="title-wrap">
+            <h1>Constituent Impact Workspace</h1>
+            <p>Diagnose the path from public interest to first meaningful action, sustained participation, and cross-network contribution.</p>
+          </div>
+          <span class="demo-badge">Illustrative V1 · synthetic network data</span>
+        </div>
+        <div class="meta-chips">
+          <span class="meta-chip"><b>Data source:</b> Constituent CRM + partner feeds</span>
+          <span class="meta-chip"><b>Last sync:</b> Today, 8:42 AM</span>
+          <span class="meta-chip"><b>Network:</b> 317 partner organizations</span>
+          <span class="meta-chip"><b>Bowtie confidence:</b> 86%</span>
+          <button class="setup-link" data-mode-target="setup">View setup →</button>
+        </div>
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-mode="operator">Operator Workspace</button>
+          <button class="mode-tab" data-mode="setup">Setup &amp; Trust</button>
+        </div>
+      </section>
+
+      <div class="workspace-body">
+        <section class="view" id="operatorView">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Network performance</h2>
+                <p class="panel-sub">A constituent lifecycle view across national campaigns, community partners, fellowships, advocacy, and giving pathways.</p>
+              </div>
+              <span class="pill warn">2 constraints need intervention</span>
+            </div>
+            <div class="kpi-grid" id="kpiGrid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Constituent Bowtie Canvas</h2>
+                <p class="panel-sub">Click any stage—or one of the three scenario lenses—to inspect performance, root causes, and the recommended intervention.</p>
+              </div>
+              <div class="legend">
+                <span><i class="dot good"></i>Healthy</span>
+                <span><i class="dot warn"></i>Watch</span>
+                <span><i class="dot bad"></i>At risk</span>
+              </div>
+            </div>
+
+            <div class="lens-row" id="lensRow"></div>
+
+            <div class="axis">
+              <span>Mobilization &amp; matching</span>
+              <span class="center">First meaningful action</span>
+              <span>Retention &amp; pathway expansion</span>
+            </div>
+            <div class="bowtie-scroll">
+              <div class="bowtie-canvas">
+                <svg class="bowtie-band" viewBox="0 0 1120 410" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="leftBand" x1="0" x2="1">
+                      <stop offset="0%" stop-color="#eef6fd"/>
+                      <stop offset="100%" stop-color="#dbeaf7"/>
+                    </linearGradient>
+                    <linearGradient id="rightBand" x1="0" x2="1">
+                      <stop offset="0%" stop-color="#edf5e0"/>
+                      <stop offset="100%" stop-color="#f5faeb"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M20,44 L560,175 L560,235 L20,366 Z" fill="url(#leftBand)" stroke="#d1e3f2" stroke-width="1"/>
+                  <path d="M560,175 L1100,44 L1100,366 L560,235 Z" fill="url(#rightBand)" stroke="#dce9c4" stroke-width="1"/>
+                  <line x1="20" y1="205" x2="1100" y2="205" stroke="#c8d0da" stroke-width="1" stroke-dasharray="4 5"/>
+                  <circle cx="560" cy="205" r="8" fill="#172230"/>
+                  <text x="560" y="392" text-anchor="middle" font-family="Poppins, sans-serif" font-size="9" fill="#667085">Knot = first service action completed and verified</text>
+                </svg>
+                <div class="stage-grid" id="stageGrid"></div>
+              </div>
+            </div>
+            <p class="bowtie-note">The system treats the first completed service action—not a form submission, screening approval, or scheduled shift—as the conversion moment. The right side measures whether that first action becomes a durable constituent relationship across the network.</p>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Active Impact Sprints</h2>
+                <p class="panel-sub">Interventions running against constrained lifecycle stages, with baseline, current result, target, evidence, and operating decision.</p>
+              </div>
+            </div>
+            <div class="sprint-grid" id="sprintGrid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Technology Impact Ledger</h2>
+                <p class="panel-sub">Agents, Cowork Workpacks, CRM changes, workflows, analytics, and data interventions connected to measurable constituent outcomes.</p>
+              </div>
+              <div class="seg" id="ledgerMode">
+                <button class="seg-btn active" data-ledger-mode="impact">Impact</button>
+                <button class="seg-btn" data-ledger-mode="economics">Agent Economics</button>
+              </div>
+            </div>
+            <div class="filter-row" id="ledgerFilters"></div>
+            <div class="table-wrap">
+              <table>
+                <thead id="ledgerHead"></thead>
+                <tbody id="ledgerBody"></tbody>
+              </table>
+            </div>
+            <p class="bowtie-note" id="ledgerNote"></p>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Evidence Timeline</h2>
+                <p class="panel-sub">Proof sequence showing movement from deployed capability to trusted behavior change and verified constituent outcomes.</p>
+              </div>
+            </div>
+            <div class="evidence-summary">
+              <div class="summary-box"><span>Current evidence level</span><b>L4 — Behavior Changed</b></div>
+              <div class="summary-box"><span>Outcome status</span><b>Activation improving; target not met</b></div>
+              <div class="summary-box"><span>Recommended decision</span><b>Tune and continue</b></div>
+            </div>
+            <div class="timeline" id="timeline"></div>
+          </section>
+        </section>
+
+        <section class="view" id="setupView" hidden>
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Data Hub</h2>
+                <p class="panel-sub">Integrity of the constituent, engagement, compliance, and partner-event layer used to calculate the Bowtie.</p>
+              </div>
+              <span class="pill good">Ready with watch items</span>
+            </div>
+            <div class="setup-grid">
+              <div class="score-card">
+                <div class="readiness-ring">
+                  <div class="readiness-in"><div><div class="readiness-num">86</div><div class="readiness-cap">Readiness</div></div></div>
+                </div>
+                <div class="score-line"><span>Fields present</span><b>100%</b></div>
+                <div class="score-line"><span>Average populated</span><b>72%</b></div>
+                <div class="score-line"><span>Lifecycle mapped</span><b>86%</b></div>
+                <div class="score-line"><span>Identity confidence</span><b>91%</b></div>
+              </div>
+              <div class="setup-kpis">
+                <div class="setup-kpi"><span>Constituent events</span><b>1,482,911</b></div>
+                <div class="setup-kpi"><span>Integrated sources</span><b>7</b></div>
+                <div class="setup-kpi"><span>Partner organizations</span><b>317</b></div>
+                <div class="setup-kpi"><span>Potential duplicates</span><b>4.2%</b></div>
+                <div class="setup-kpi"><span>Unowned exceptions</span><b>463</b></div>
+                <div class="setup-kpi"><span>Metric readiness</span><b>6 of 7</b></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Required field validation</h2>
+                <p class="panel-sub">Fields that determine identity, routing, activation, retention, and pathway evidence.</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="validation-table">
+                <thead><tr><th>Field</th><th>Present</th><th>Populated</th><th>Status</th><th>Why it matters</th></tr></thead>
+                <tbody id="validationBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Lifecycle Mapping Setup</h2>
+                <p class="panel-sub">Defines how CRM and partner-system records become constituent Bowtie events.</p>
+              </div>
+            </div>
+            <div class="mapping-grid" id="mappingGrid"></div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="flyScrim"></div>
+<aside class="flyout" id="flyout" aria-label="Scenario performance details">
+  <div class="fly-head">
+    <div class="fly-head-row">
+      <div>
+        <div class="fly-title" id="flyTitle">Scenario performance</div>
+        <div class="fly-context">
+          <span class="ctx" id="flySegment"></span>
+          <span class="ctx" id="flyStage"></span>
+          <span class="ctx">Synthetic data</span>
+        </div>
+      </div>
+      <button class="fly-close" id="flyClose" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <div class="fly-body" id="flyBody"></div>
+</aside>
+
+<div class="scrim intv-scrim" id="intvScrim"></div>
+<aside class="intv-drawer" id="intvDrawer" aria-label="Recommended constituent intervention">
+  <div class="intv-head">
+    <div>
+      <div class="eyebrow">Recommended intervention</div>
+      <div class="intv-title" id="intvTitle"></div>
+    </div>
+    <button class="fly-close" id="intvClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="intv-body" id="intvBody"></div>
+  <div class="intv-foot" id="intvFoot">
+    <button class="intv-btn ghost" id="previewBtn">Preview playbook</button>
+    <button class="intv-btn primary" id="addSprintBtn">Add to Impact Sprint</button>
+  </div>
+  <div class="intv-success" id="intvSuccess" hidden></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const nf = new Intl.NumberFormat("en-US");
+
+  const KPIS = [
+    { label: "People reached", value: "186,420", foot: "National + partner campaigns", trend: "+12% vs plan", tone: "good" },
+    { label: "Qualified matches", value: "17,499", foot: "Skills, location, interest aligned", trend: "84% of target", tone: "warn" },
+    { label: "First actions completed", value: "11,899", foot: "Verified knot conversions", trend: "+6% this quarter", tone: "good" },
+    { label: "12-month constituent retention", value: "67%", foot: "Active with at least one entity", trend: "5 pts below target", tone: "warn" },
+    { label: "Cross-network expansion", value: "18%", foot: "Second role, program, fellowship, advocacy, or giving", trend: "6 pts below target", tone: "bad" }
+  ];
+
+  const STAGES = [
+    { key:"Awareness", label:"Awareness", scenario:"mobilization", count:186420, unit:"People reached", attainment:104, conversion:"23%", target:"25%", velocity:"4 days", health:"good", sprint:"Campaign-to-Match" },
+    { key:"Education", label:"Education", scenario:"mobilization", count:42680, unit:"Engaged constituents", attainment:92, conversion:"41%", target:"48%", velocity:"6 days", health:"warn", sprint:"Campaign-to-Match" },
+    { key:"Selection", label:"Selection", scenario:"activation", count:17499, unit:"Qualified opportunity matches", attainment:84, conversion:"68%", target:"78%", velocity:"9 days", health:"warn", sprint:"First-Service Activation" },
+    { key:"Commit", label:"Commit", scenario:"activation", count:11899, unit:"First service actions completed", attainment:87, conversion:"73%", target:"80%", velocity:"18 days", health:"bad", waist:true, sprint:"First-Service Activation" },
+    { key:"Onboard", label:"Onboard", scenario:"pathways", count:8687, unit:"Impact confirmed + feedback captured", attainment:96, conversion:"69%", target:"75%", velocity:"3 days", health:"good", sprint:"Constituent Pathways" },
+    { key:"Impact", label:"Impact", scenario:"pathways", count:5994, unit:"Recurring participants", attainment:90, conversion:"18%", target:"24%", velocity:"67 days", health:"warn", sprint:"Constituent Pathways" },
+    { key:"Expansion", label:"Expansion & Ambassador", scenario:"pathways", count:1079, unit:"Expanded contribution pathways", attainment:75, conversion:"18%", target:"24%", velocity:"124 days", health:"warn", sprint:"Constituent Pathways" }
+  ];
+
+  const LENSES = [
+    { key:"mobilization", title:"Mobilization Quality", sub:"Awareness → Education → Selection", stat:"41%", statLabel:"qualified interest", stage:"Education" },
+    { key:"activation", title:"First-Service Activation", sub:"Selection → Commit → Onboard", stat:"18 days", statLabel:"median time to action", stage:"Commit" },
+    { key:"pathways", title:"Constituent Pathway Expansion", sub:"Onboard → Impact → Expansion", stat:"18%", statLabel:"cross-network expansion", stage:"Expansion" }
+  ];
+
+  const SPRINTS = [
+    { name:"Campaign-to-Match Sprint", scenario:"mobilization", stage:"Education", metric:"Qualified interest → relevant match", baseline:31, current:41, target:48, evidence:"L3 — Trusted", decision:"Tune" },
+    { name:"First-Service Activation Sprint", scenario:"activation", stage:"Commit", metric:"Qualified match → first action completed", baseline:62, current:68, target:78, evidence:"L4 — Behavior Changed", decision:"Continue" },
+    { name:"Constituent Pathways Sprint", scenario:"pathways", stage:"Expansion", metric:"Single-program → second contribution pathway", baseline:12, current:18, target:24, evidence:"L3 — Trusted", decision:"Tune" }
+  ];
+
+  const SCENARIOS = {
+    mobilization: {
+      title:"Mobilization Performance",
+      segment:"National campaigns + partner network",
+      stageRange:"Awareness → Selection",
+      agent:"Constituent Mobilization Agent",
+      score:58, health:"bad",
+      summary:"Reach is strong, but incomplete constituent signals and fragmented routing reduce the number of people who receive a timely, relevant opportunity.",
+      rca:[
+        { label:"Qualified interest rate", value:"41%", delta:"7 pts below target", tone:"bad" },
+        { label:"Complete constituent profiles", value:"57%", delta:"23 pts below target", tone:"bad" },
+        { label:"Time to first relevant match", value:"6.4 days", delta:"3.4 days over target", tone:"warn" },
+        { label:"Potential duplicate identities", value:"8.7%", delta:"5.7 pts over threshold", tone:"bad" }
+      ],
+      coverage:[
+        { label:"Cause / issue interest", ok:true },
+        { label:"Location + travel radius", ok:true },
+        { label:"Skills + qualifications", ok:false },
+        { label:"Recurring availability", ok:false },
+        { label:"Preferred participation type", ok:false },
+        { label:"Consent scope by entity", ok:true }
+      ],
+      positives:[
+        { title:"Campaign reach", copy:"National and partner campaigns are running at 104% of plan." },
+        { title:"Early engagement", copy:"Education content earns a 64% completion rate once opened." }
+      ],
+      negatives:[
+        { title:"Profile gaps", copy:"43% of engaged constituents have no recurring availability captured." },
+        { title:"Routing latency", copy:"31% of qualified requests remain unowned for more than 48 hours." },
+        { title:"Identity fragmentation", copy:"The same constituent can appear separately across partner and campaign records." }
+      ],
+      solution:{
+        subtitle:"The constraint is diagnosed; two interventions are active and two remain proposed.",
+        adoption:"63%", evidence:"L3 — Trusted", cost:"$690 / mo", decision:"Tune",
+        items:[
+          { name:"Campaign Intake Copilot", type:"Microsoft Agent", status:"Healthy" },
+          { name:"Constituent Mobilization Agent", type:"cX Agent", status:"Watch" },
+          { name:"Constituent 360 Identity Resolution", type:"Data Integration", status:"Proposed" },
+          { name:"Partner Routing SLA Workflow", type:"CRM Configuration", status:"Proposed" }
+        ]
+      },
+      intervention:{
+        title:"Campaign-to-Match Intervention",
+        actionTitle:"Launch a 30-day Campaign-to-Match playbook",
+        found:"<p>The network is producing sufficient awareness, but <b>43% of engaged constituents lack availability</b>, <b>39% lack usable skills data</b>, and nearly one-third of qualified requests wait more than 48 hours for an owner.</p><p>The leakage is not primarily a demand problem. It is a signal-quality, identity, and routing problem.</p>",
+        action:"<p>Use the <b>Constituent Mobilization Agent</b> to enrich missing profile signals, resolve likely duplicates, recommend the best-fit opportunity across the network, and place exceptions into a human-owned routing queue.</p><p>Apply a two-hour service-level target for high-intent constituents and a 24-hour target for all other qualified matches.</p>",
+        measures:["Complete profile rate","Time to first relevant match","Qualified interest → match conversion","Unowned requests older than 48 hours"],
+        steps:[
+          ["Enrich","Collect interests, skills, location, availability, and participation preferences."],
+          ["Resolve","Merge likely duplicate identities using governed confidence thresholds."],
+          ["Match","Rank relevant opportunities across participating organizations."],
+          ["Route","Assign an accountable owner and escalate exceptions."],
+          ["Measure","Track conversion and speed by campaign, partner, and constituent segment."]
+        ],
+        success:"Campaign-to-Match playbook added to the Campaign-to-Match Sprint. First operating review scheduled after 14 days."
+      }
+    },
+    activation: {
+      title:"First-Service Activation",
+      segment:"Network-wide volunteer activation",
+      stageRange:"Selection → Commit → Onboard",
+      agent:"Activation Health Agent",
+      score:44, health:"bad",
+      summary:"Qualified constituents are accepting relevant matches, but screening delays, unowned exceptions, and attendance risk are preventing timely first-action completion.",
+      rca:[
+        { label:"Match → first action conversion", value:"68%", delta:"10 pts below target", tone:"bad" },
+        { label:"Median time to first action", value:"18 days", delta:"8 days over target", tone:"bad" },
+        { label:"Screening completed within 72h", value:"52%", delta:"23 pts below target", tone:"bad" },
+        { label:"Scheduled → attended", value:"81%", delta:"9 pts below target", tone:"warn" }
+      ],
+      coverage:[
+        { label:"Opportunity match accepted", ok:true },
+        { label:"Background screening complete", ok:false },
+        { label:"Waiver + orientation complete", ok:false },
+        { label:"Shift / action scheduled", ok:true },
+        { label:"Attendance risk score", ok:false },
+        { label:"First action verified", ok:false }
+      ],
+      positives:[
+        { title:"Match acceptance", copy:"74% of recommended opportunities are accepted by constituents." },
+        { title:"Reminder engagement", copy:"Pre-action reminders earn an 82% open rate." }
+      ],
+      negatives:[
+        { title:"Screening backlog", copy:"1,136 qualified constituents are waiting on background or credential review." },
+        { title:"Unowned exceptions", copy:"463 stalled records have no accountable coordinator." },
+        { title:"Attendance risk", copy:"19% of scheduled first actions show no reconfirmation within 48 hours." }
+      ],
+      solution:{
+        subtitle:"The control tower measures the complete intervention, not only the individual agent.",
+        adoption:"71%", evidence:"L4 — Behavior Changed", cost:"$1.2K / mo", decision:"Continue",
+        items:[
+          { name:"Volunteer Intake Copilot", type:"Microsoft Agent", status:"Healthy" },
+          { name:"cX Activation Health Agent", type:"cX Agent", status:"Healthy" },
+          { name:"Activation Command Center", type:"Cowork Workpack", status:"Watch" },
+          { name:"Compliance Action Plan", type:"CRM Configuration", status:"Healthy" },
+          { name:"Mobile Attendance Verification", type:"Data Integration", status:"Watch" }
+        ]
+      },
+      intervention:{
+        title:"First-Service Activation Intervention",
+        actionTitle:"Tune the First-Service Activation Sprint",
+        found:"<p>Selection-to-Commit conversion is <b>68% against a 78% target</b>, and the median time from qualified match to verified first action is <b>18 days</b>.</p><p>The largest observable constraint is a screening and exception backlog: 1,136 people are waiting on a required review, while 463 stalled records have no accountable owner.</p>",
+        action:"<p>Activate the <b>First-Service Activation Playbook</b> across every selected constituent. The cX Activation Health Agent will monitor each prerequisite, predict attendance risk, prompt the constituent, and route only true exceptions to a human coordinator.</p><p>The operating cadence will inspect the exception queue daily and the stage outcome weekly.</p>",
+        measures:["Screening completion within 72 hours","Median time to first action","Scheduled → attended conversion","Match → verified first action conversion"],
+        steps:[
+          ["Confirm","Validate the selected opportunity and the constituent’s intent."],
+          ["Clear","Orchestrate screening, waiver, credential, and orientation requirements."],
+          ["Schedule","Offer eligible times and confirm the first service action."],
+          ["Protect","Detect no-show risk and place exceptions with a named coordinator."],
+          ["Verify","Capture check-in, completion, hours, and the first impact signal."]
+        ],
+        success:"First-Service Activation Playbook added to the First-Service Activation Sprint. Applied across Selection and Commit records with a 14-day performance review."
+      }
+    },
+    pathways: {
+      title:"Constituent Pathway Performance",
+      segment:"Returning participants across the network",
+      stageRange:"Onboard → Impact → Expansion",
+      agent:"Constituent Pathways Agent",
+      score:62, health:"warn",
+      summary:"Recurring participation is improving, but fragmented histories and unclear relationship ownership prevent the network from recommending the next best contribution.",
+      rca:[
+        { label:"90-day repeat participation", value:"69%", delta:"6 pts below target", tone:"warn" },
+        { label:"Cross-network expansion", value:"18%", delta:"6 pts below target", tone:"bad" },
+        { label:"Current skills + interests known", value:"61%", delta:"24 pts below target", tone:"bad" },
+        { label:"Pathway owner assigned", value:"44%", delta:"36 pts below target", tone:"bad" }
+      ],
+      coverage:[
+        { label:"Verified service history", ok:true },
+        { label:"Impact feedback captured", ok:true },
+        { label:"Current interests refreshed", ok:false },
+        { label:"Cross-entity consent available", ok:true },
+        { label:"Next-best pathway scored", ok:false },
+        { label:"Relationship owner assigned", ok:false }
+      ],
+      positives:[
+        { title:"Repeat participation", copy:"90-day repeat participation has improved seven points since the last quarter." },
+        { title:"Leadership signals", copy:"2,814 constituents have exceeded 25 verified service hours." }
+      ],
+      negatives:[
+        { title:"Fragmented history", copy:"39% of repeat participants have activity split across multiple partner records." },
+        { title:"No next best action", copy:"56% of expansion-ready constituents have no recommended pathway or owner." },
+        { title:"Narrow engagement", copy:"Most right-side outreach still defaults to another shift rather than a broader contribution path." }
+      ],
+      solution:{
+        subtitle:"Retention risk and expansion readiness are measured as separate queues inside one relationship motion.",
+        adoption:"59%", evidence:"L3 — Trusted", cost:"$940 / mo", decision:"Fix Adoption",
+        items:[
+          { name:"Constituent Pathways Agent", type:"cX Agent", status:"Watch" },
+          { name:"Network Health Scan", type:"Cowork Workpack", status:"Healthy" },
+          { name:"Pathway Opportunity Analysis", type:"Cowork Workpack", status:"Watch" },
+          { name:"Constituent 360 Harmonization", type:"Data Integration", status:"Active" },
+          { name:"Consent + Visibility Guardrails", type:"CRM Configuration", status:"Healthy" }
+        ]
+      },
+      intervention:{
+        title:"Constituent Pathway Intervention",
+        actionTitle:"Launch the Constituent Pathways playbook",
+        found:"<p>Cross-network expansion is <b>18% against a 24% target</b>. The organization has strong repeat participation signals, but it cannot consistently see the constituent’s full history or assign a relationship owner.</p><p>This makes high-potential people invisible to fellowship, mentoring, advocacy, ambassador, business-leader, and giving pathways.</p>",
+        action:"<p>Use the <b>Constituent Pathways Agent</b> to create a governed next-best-contribution queue based on verified service, interests, skills, consent, readiness, and network demand.</p><p>Separate retention-risk actions from expansion actions, and require a human relationship owner to approve each cross-entity recommendation.</p>",
+        measures:["90-day repeat participation","Cross-network expansion rate","Pathway acceptance rate","Percentage with an assigned relationship owner"],
+        steps:[
+          ["Unify","Assemble a governed cross-entity constituent history."],
+          ["Refresh","Confirm current interests, skills, location, and availability."],
+          ["Score","Rank appropriate service, fellowship, advocacy, leadership, and giving pathways."],
+          ["Approve","Require a named relationship owner and consent check."],
+          ["Learn","Measure acceptance, participation, retention, and verified impact."]
+        ],
+        success:"Constituent Pathways Playbook added to the Constituent Pathways Sprint. First recommendation cohort queued for human approval."
+      }
+    }
+  };
+
+  const LEDGER = [
+    { name:"Campaign Intake Copilot", sprint:"Campaign-to-Match Sprint", type:"Microsoft Agent", scenario:"mobilization", mechanism:"Structures campaign intake and captures missing constituent signals", adoption:"79%", trust:"74%", evidence:"L3 Trusted", status:"Healthy", volume:"38,440 runs", consumption:"7.8M tokens", cost:"$312", unit:"$0.11 / enriched profile", value:"18 hrs / week" },
+    { name:"Constituent Mobilization Agent", sprint:"Campaign-to-Match Sprint", type:"cX Agent", scenario:"mobilization", mechanism:"Ranks relevant opportunities and creates a governed routing recommendation", adoption:"63%", trust:"58%", evidence:"L3 Trusted", status:"Tune", volume:"9,810 runs", consumption:"5.2M tokens", cost:"$286", unit:"$0.42 / accepted match", value:"31 hrs / week" },
+    { name:"Constituent 360 Identity Resolution", sprint:"Campaign-to-Match Sprint", type:"Data Integration", scenario:"mobilization", mechanism:"Links likely duplicate records across campaign and partner systems", adoption:"—", trust:"—", evidence:"L1 Deployed", status:"Active", volume:"1.48M events", consumption:"—", cost:"$410", unit:"$0.03 / resolved event", value:"Baseline" },
+    { name:"Partner Routing SLA Workflow", sprint:"Campaign-to-Match Sprint", type:"CRM Configuration", scenario:"mobilization", mechanism:"Assigns an owner and escalates qualified requests that breach service levels", adoption:"52%", trust:"—", evidence:"L2 Adopted", status:"Watch", volume:"12,904 records", consumption:"—", cost:"$96", unit:"$0.01 / routed record", value:"22 hrs / week" },
+
+    { name:"Volunteer Intake Copilot", sprint:"First-Service Activation Sprint", type:"Microsoft Agent", scenario:"activation", mechanism:"Explains requirements and collects structured onboarding evidence", adoption:"84%", trust:"78%", evidence:"L4 Behavior Changed", status:"Healthy", volume:"18,210 runs", consumption:"9.1M tokens", cost:"$376", unit:"$0.09 / completed intake", value:"42 hrs / week" },
+    { name:"cX Activation Health Agent", sprint:"First-Service Activation Sprint", type:"cX Agent", scenario:"activation", mechanism:"Detects prerequisite gaps, attendance risk, and unowned exceptions before drop-off", adoption:"71%", trust:"69%", evidence:"L4 Behavior Changed", status:"Healthy", volume:"14,620 runs", consumption:"10.7M tokens", cost:"$448", unit:"$0.18 / verified action", value:"56 hrs / week" },
+    { name:"Activation Command Center", sprint:"First-Service Activation Sprint", type:"Cowork Workpack", scenario:"activation", mechanism:"Creates a daily coordinator briefing and an exception approval package", adoption:"66%", trust:"72%", evidence:"L3 Trusted", status:"Watch", volume:"21 packs", consumption:"1,260 credits", cost:"$304", unit:"$17.88 / accepted pack", value:"27 hrs / month" },
+    { name:"Compliance Action Plan", sprint:"First-Service Activation Sprint", type:"CRM Configuration", scenario:"activation", mechanism:"Enforces screening, waiver, credential, and orientation prerequisites", adoption:"91%", trust:"—", evidence:"L4 Behavior Changed", status:"Healthy", volume:"11,899 plans", consumption:"—", cost:"$122", unit:"$0.01 / plan", value:"34 hrs / week" },
+    { name:"Mobile Attendance Verification", sprint:"First-Service Activation Sprint", type:"Data Integration", scenario:"activation", mechanism:"Verifies check-in, completion, hours, and the knot event", adoption:"76%", trust:"—", evidence:"L3 Trusted", status:"Watch", volume:"9,106 check-ins", consumption:"—", cost:"$188", unit:"$0.02 / verified action", value:"Baseline" },
+
+    { name:"Constituent Pathways Agent", sprint:"Constituent Pathways Sprint", type:"cX Agent", scenario:"pathways", mechanism:"Recommends the next best contribution using history, readiness, consent, and demand", adoption:"59%", trust:"62%", evidence:"L3 Trusted", status:"Fix Adoption", volume:"5,420 runs", consumption:"8.6M tokens", cost:"$382", unit:"$0.74 / accepted pathway", value:"19 hrs / week" },
+    { name:"Network Health Scan", sprint:"Constituent Pathways Sprint", type:"Cowork Workpack", scenario:"pathways", mechanism:"Separates retention-risk and expansion-ready cohorts for human review", adoption:"68%", trust:"70%", evidence:"L3 Trusted", status:"Healthy", volume:"16 scans", consumption:"980 credits", cost:"$238", unit:"$19.83 / accepted scan", value:"28 hrs / month" },
+    { name:"Pathway Opportunity Analysis", sprint:"Constituent Pathways Sprint", type:"Cowork Workpack", scenario:"pathways", mechanism:"Builds an evidence-backed approval package for each cross-entity pathway", adoption:"56%", trust:"64%", evidence:"L3 Trusted", status:"Tune", volume:"27 analyses", consumption:"1,420 credits", cost:"$346", unit:"$18.21 / accepted analysis", value:"22 hrs / month" },
+    { name:"Constituent 360 Harmonization", sprint:"Constituent Pathways Sprint", type:"Data Integration", scenario:"pathways", mechanism:"Consolidates service, event, fellowship, advocacy, and giving histories", adoption:"—", trust:"—", evidence:"L2 Adopted", status:"Active", volume:"317 partner feeds", consumption:"—", cost:"$516", unit:"$1.63 / partner feed", value:"Baseline" },
+    { name:"Consent + Visibility Guardrails", sprint:"Constituent Pathways Sprint", type:"CRM Configuration", scenario:"pathways", mechanism:"Applies cross-entity consent, purpose, and role-based visibility rules", adoption:"93%", trust:"—", evidence:"L4 Behavior Changed", status:"Healthy", volume:"24,118 checks", consumption:"—", cost:"$84", unit:"$0.00 / check", value:"Risk reduced" }
+  ];
+
+  const VALIDATION = [
+    { field:"constituent_id", populated:100, status:"good", why:"Unifies activity across systems and entities." },
+    { field:"source_entity", populated:94, status:"good", why:"Preserves partner ownership and governance." },
+    { field:"engagement_type", populated:98, status:"good", why:"Maps each interaction to a lifecycle event." },
+    { field:"interest_area", populated:72, status:"warn", why:"Determines relevant campaigns and programs." },
+    { field:"skills_and_qualifications", populated:61, status:"warn", why:"Improves opportunity matching and eligibility." },
+    { field:"recurring_availability", populated:57, status:"bad", why:"Reduces routing failure and scheduling latency." },
+    { field:"screening_status", populated:88, status:"good", why:"Controls safe progression to active service." },
+    { field:"first_action_completed_on", populated:81, status:"warn", why:"Establishes the knot and time-to-impact." },
+    { field:"partner_consent_scope", populated:93, status:"good", why:"Controls lawful cross-entity visibility." },
+    { field:"next_best_pathway", populated:44, status:"bad", why:"Supports retention and cross-network expansion." }
+  ];
+
+  const MAPPING = [
+    { stage:"Awareness", object:"Campaign response", condition:"New reachable person", anchor:"First response date", owner:"Mobilization team", stall:"7 days" },
+    { stage:"Education", object:"Engagement event", condition:"Mission content consumed", anchor:"First meaningful engagement", owner:"Campaign owner", stall:"10 days" },
+    { stage:"Selection", object:"Opportunity match", condition:"Qualified fit accepted", anchor:"Match accepted date", owner:"Partner coordinator", stall:"7 days" },
+    { stage:"Commit", object:"Service record", condition:"First action completed", anchor:"Verified completion date", owner:"Activation lead", stall:"14 days" },
+    { stage:"Onboard", object:"Impact confirmation", condition:"Feedback + impact sent", anchor:"Confirmation date", owner:"Program owner", stall:"5 days" },
+    { stage:"Impact", object:"Participation history", condition:"Second action completed", anchor:"Repeat action date", owner:"Relationship owner", stall:"90 days" },
+    { stage:"Expansion", object:"Pathway opportunity", condition:"Second contribution path accepted", anchor:"Pathway start date", owner:"Pathway owner", stall:"120 days" }
+  ];
+
+  const EVIDENCE = [
+    { level:"L0", label:"Defined", copy:"Outcome and intervention specified", state:"done" },
+    { level:"L1", label:"Deployed", copy:"Capabilities live in workflow", state:"done" },
+    { level:"L2", label:"Adopted", copy:"Target users consistently use it", state:"done" },
+    { level:"L3", label:"Trusted", copy:"Recommendations accepted", state:"done" },
+    { level:"L4", label:"Behavior changed", copy:"Coordinators act earlier", state:"current" },
+    { level:"L5", label:"Outcome moved", copy:"Activation target sustained", state:"" }
+  ];
+
+  const state = {
+    mode:"operator",
+    activeScenario:null,
+    activeStage:null,
+    ledgerMode:"impact",
+    ledgerFilter:"All",
+    added:{ mobilization:false, activation:false, pathways:false }
+  };
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+  function healthColor(health) {
+    if (health === "good") return "var(--good)";
+    if (health === "warn") return "var(--warn)";
+    if (health === "bad") return "var(--bad)";
+    return "var(--neutral)";
+  }
+  function decisionTone(decision) {
+    const d = String(decision).toLowerCase();
+    if (d === "scale") return "good";
+    if (d === "tune" || d === "continue") return "warn";
+    if (d.includes("fix")) return "bad";
+    return "neutral";
+  }
+  function statusTone(status) {
+    const s = String(status).toLowerCase();
+    if (s === "healthy" || s === "active") return "good";
+    if (s === "watch" || s === "tune" || s === "continue") return "warn";
+    if (s.includes("fix") || s === "at risk") return "bad";
+    return "neutral";
+  }
+  function ringBackground(value, color) {
+    const deg = Math.max(0, Math.min(100, value)) * 3.6;
+    return `conic-gradient(${color} 0 ${deg}deg, var(--line) ${deg}deg 360deg)`;
+  }
+  function sprintProgress(sp) {
+    const span = sp.target - sp.baseline;
+    if (!span) return 0;
+    return Math.max(0, Math.min(100, Math.round(((sp.current - sp.baseline) / span) * 100)));
+  }
+
+  function renderKPIs() {
+    $("#kpiGrid").innerHTML = KPIS.map(k => `
+      <article class="kpi-card">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-foot">${k.foot}<br><span class="trend ${k.tone}">${k.trend}</span></div>
+      </article>`).join("");
+  }
+
+  function renderLenses() {
+    $("#lensRow").innerHTML = LENSES.map(l => `
+      <button class="lens ${state.activeScenario === l.key ? "active" : ""}" data-scenario="${l.key}" data-stage="${l.stage}">
+        <div class="lens-title">${l.title}</div>
+        <div class="lens-sub">${l.sub}</div>
+        <div class="lens-stat"><b>${l.stat}</b><span>${l.statLabel} · click to inspect</span></div>
+      </button>`).join("");
+    $$(".lens").forEach(btn => btn.addEventListener("click", () => openScenario(btn.dataset.scenario, btn.dataset.stage)));
+  }
+
+  function renderStages() {
+    $("#stageGrid").innerHTML = STAGES.map((s, idx) => {
+      const color = healthColor(s.health);
+      const active = state.activeScenario && s.scenario === state.activeScenario;
+      return `
+        <button class="stage-card ${s.waist ? "waist" : ""} ${active ? "active-zone" : ""}" data-stage="${s.key}" aria-label="Open ${s.label} performance">
+          <div class="stage-top"><span class="stage-num">${idx + 1}</span><span class="health ${s.health}"></span></div>
+          <div class="stage-name">${s.label}</div>
+          <div class="stage-count">${nf.format(s.count)}</div>
+          <div class="stage-unit">${s.unit}</div>
+          <div class="ring-row">
+            <div class="mini-ring" style="background:${ringBackground(s.attainment, color)}"><div class="mini-ring-in">${s.attainment}%</div></div>
+            <div class="attain-copy"><b>${s.attainment}% of goal</b>Stage volume attainment</div>
+          </div>
+          <div class="stage-metrics">
+            <div class="stage-metric"><span>Conversion</span><b>${s.conversion} / ${s.target}</b></div>
+            <div class="stage-metric"><span>Velocity</span><b>${s.velocity}</b></div>
+          </div>
+          <div class="stage-chip">${s.sprint} Sprint</div>
+        </button>`;
+    }).join("");
+    $$(".stage-card").forEach(btn => btn.addEventListener("click", () => {
+      const stage = STAGES.find(s => s.key === btn.dataset.stage);
+      openScenario(stage.scenario, stage.key);
+    }));
+  }
+
+  function renderSprints() {
+    $("#sprintGrid").innerHTML = SPRINTS.map(sp => {
+      const progress = sprintProgress(sp);
+      const tone = decisionTone(sp.decision);
+      const added = state.added[sp.scenario];
+      return `
+        <article class="sprint-card">
+          <div class="sprint-head">
+            <div class="sprint-name">${sp.name}</div>
+            <span class="pill ${added ? "good" : tone}">${added ? "Playbook added" : sp.decision}</span>
+          </div>
+          <div class="sprint-stage">Target stage: <b>${sp.stage}</b></div>
+          <div class="sprint-metric">${sp.metric}</div>
+          <div class="sprint-prog">
+            <div class="sprint-val"><b>${sp.baseline}%</b><span>Baseline</span></div>
+            <div class="arrow">→</div>
+            <div class="sprint-val"><b>${sp.current}%</b><span>Current</span></div>
+            <div class="arrow">→</div>
+            <div class="sprint-val"><b>${sp.target}%</b><span>Target</span></div>
+          </div>
+          <div class="progress"><span style="width:${progress}%"></span></div>
+          <div class="sprint-foot"><span>${sp.evidence}</span><span>${progress}% of intended movement</span></div>
+        </article>`;
+    }).join("");
+  }
+
+  function renderLedgerFilters() {
+    const types = ["All", ...new Set(LEDGER.map(x => x.type))];
+    $("#ledgerFilters").innerHTML = types.map(type => `<button class="filter-btn ${state.ledgerFilter === type ? "active" : ""}" data-filter="${type}">${type}</button>`).join("");
+    $$(".filter-btn").forEach(btn => btn.addEventListener("click", () => {
+      state.ledgerFilter = btn.dataset.filter;
+      renderLedgerFilters();
+      renderLedger();
+    }));
+  }
+
+  function renderLedger() {
+    const rows = state.ledgerFilter === "All" ? LEDGER : LEDGER.filter(x => x.type === state.ledgerFilter);
+    if (state.ledgerMode === "impact") {
+      $("#ledgerHead").innerHTML = `<tr><th>Intervention</th><th>Sprint</th><th>Type</th><th>Outcome mechanism</th><th>Adoption</th><th>Trust</th><th>Evidence</th><th>Status</th></tr>`;
+      $("#ledgerBody").innerHTML = rows.map(r => `<tr>
+        <td class="td-name">${r.name}<span class="td-sub">${SCENARIOS[r.scenario].title}</span></td>
+        <td>${r.sprint}</td><td><span class="type-tag">${r.type}</span></td><td>${r.mechanism}</td>
+        <td>${r.adoption}</td><td>${r.trust}</td><td>${r.evidence}</td><td><span class="pill ${statusTone(r.status)}">${r.status}</span></td>
+      </tr>`).join("");
+      $("#ledgerNote").textContent = "The ledger connects each technical and operating intervention to an intended mechanism, observed adoption, human trust, behavior change, and outcome evidence. No single component receives credit for the full result.";
+    } else {
+      $("#ledgerHead").innerHTML = `<tr><th>Intervention</th><th>Type</th><th>Usage volume</th><th>Consumption</th><th>Monthly operating cost</th><th>Unit cost</th><th>Modeled capacity / value</th><th>Evidence</th></tr>`;
+      $("#ledgerBody").innerHTML = rows.map(r => `<tr>
+        <td class="td-name">${r.name}<span class="td-sub">${r.sprint}</span></td><td><span class="type-tag">${r.type}</span></td>
+        <td>${r.volume}</td><td>${r.consumption}</td><td>${r.cost}</td><td>${r.unit}</td><td>${r.value}</td><td>${r.evidence}</td>
+      </tr>`).join("");
+      $("#ledgerNote").textContent = "Digital-labor consumption is an operating-cost input. The demo joins usage to accepted outputs, approved human actions, and outcome evidence before any value is modeled.";
+    }
+  }
+
+  function renderTimeline() {
+    $("#timeline").innerHTML = EVIDENCE.map(e => `
+      <div class="ev-step ${e.state}">
+        <div class="ev-dot">${e.level}</div>
+        <div class="ev-label">${e.label}</div>
+        <div class="ev-copy">${e.copy}</div>
+      </div>`).join("");
+  }
+
+  function renderValidation() {
+    $("#validationBody").innerHTML = VALIDATION.map(v => {
+      const color = healthColor(v.status);
+      const label = v.status === "good" ? "Ready" : v.status === "warn" ? "Watch" : "Gap";
+      return `<tr>
+        <td class="td-name">${v.field}</td>
+        <td>Yes</td>
+        <td><span class="bar"><i style="width:${v.populated}%;background:${color}"></i></span>${v.populated}%</td>
+        <td><span class="pill ${v.status}">${label}</span></td>
+        <td>${v.why}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  function renderMapping() {
+    $("#mappingGrid").innerHTML = MAPPING.map((m, i) => `
+      <article class="map-card">
+        <div class="eyebrow">Stage ${i + 1}</div>
+        <h4>${m.stage}</h4>
+        <p><b>Object:</b> ${m.object}</p>
+        <p><b>Condition:</b> ${m.condition}</p>
+        <p><b>Date anchor:</b> ${m.anchor}</p>
+        <p><b>Owner:</b> ${m.owner}</p>
+        <p><b>Stalled:</b> ${m.stall}</p>
+      </article>`).join("");
+  }
+
+  function renderAll() {
+    renderKPIs();
+    renderLenses();
+    renderStages();
+    renderSprints();
+    renderLedgerFilters();
+    renderLedger();
+    renderTimeline();
+    renderValidation();
+    renderMapping();
+  }
+
+  function scenarioScoreRing(sc) {
+    const color = healthColor(sc.health);
+    return `<div class="score-ring" style="background:${ringBackground(sc.score, color)}"><div class="score-ring-in"><div><b>${sc.score}</b><span>Performance index</span></div></div></div>`;
+  }
+
+  function renderFlyout(sc, stageKey) {
+    const stage = STAGES.find(s => s.key === stageKey) || STAGES.find(s => s.scenario === state.activeScenario);
+    $("#flyTitle").textContent = sc.title;
+    $("#flySegment").textContent = sc.segment;
+    $("#flyStage").textContent = `${stage.label} · ${sc.stageRange}`;
+
+    $("#flyBody").innerHTML = `
+      <section class="fly-section">
+        <div class="hero-diagnosis">
+          ${scenarioScoreRing(sc)}
+          <div class="hero-copy">
+            <div class="eyebrow">${sc.stageRange}</div>
+            <h2>${sc.summary}</h2>
+            <p>Performance is calculated from synthetic lifecycle volume, conversion, velocity, ownership, and evidence signals.</p>
+            <div class="agent">Diagnostic agent: ${sc.agent}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="fly-section">
+        <h3>Root-cause performance</h3>
+        <div class="rca-grid">${sc.rca.map(r => `
+          <div class="rca">
+            <div class="rca-label">${r.label}</div>
+            <div class="rca-value">${r.value}</div>
+            <div class="rca-delta ${r.tone}">${r.delta}</div>
+          </div>`).join("")}
+        </div>
+      </section>
+
+      <section class="fly-section">
+        <h3>Evidence coverage</h3>
+        <div class="coverage-list">${sc.coverage.map(c => `
+          <div class="coverage-item"><span class="check ${c.ok ? "yes" : "no"}">${c.ok ? "✓" : "!"}</span>${c.label}</div>`).join("")}
+        </div>
+      </section>
+
+      <section class="fly-section">
+        <h3>What is helping—and what is breaking</h3>
+        <div class="driver-columns">
+          <div class="driver-col">
+            <h4>Positive signals</h4>
+            ${sc.positives.map(d => `<div class="driver pos"><b>${d.title}</b>${d.copy}</div>`).join("")}
+          </div>
+          <div class="driver-col">
+            <h4>Constraint signals</h4>
+            ${sc.negatives.map(d => `<div class="driver neg"><b>${d.title}</b>${d.copy}</div>`).join("")}
+          </div>
+        </div>
+      </section>
+
+      <section class="fly-section">
+        <div class="solution-head">
+          <div>
+            <h3 style="margin:0">Solutions operating against this constraint</h3>
+            <p>${sc.solution.subtitle}</p>
+          </div>
+          <div class="solution-metrics">
+            <span class="solution-metric"><b>${sc.solution.adoption}</b>Adoption</span>
+            <span class="solution-metric"><b>${sc.solution.evidence}</b>Evidence</span>
+            <span class="solution-metric"><b>${sc.solution.cost}</b>Cost</span>
+            <span class="solution-metric"><b>${sc.solution.decision}</b>Decision</span>
+          </div>
+        </div>
+        <div>${sc.solution.items.map(item => `
+          <div class="solution-item">
+            <div><div class="solution-name">${item.name}</div><div class="solution-type">${item.type}</div></div>
+            <span class="pill ${statusTone(item.status)}">${item.status}</span>
+          </div>`).join("")}
+        </div>
+      </section>
+
+      <button class="recommend-btn" id="openIntervention">Open recommended intervention →</button>
+    `;
+    $("#openIntervention").addEventListener("click", openIntervention);
+  }
+
+  function openScenario(scenarioKey, stageKey) {
+    state.activeScenario = scenarioKey;
+    state.activeStage = stageKey;
+    renderLenses();
+    renderStages();
+    renderFlyout(SCENARIOS[scenarioKey], stageKey);
+    $("#flyScrim").classList.add("open");
+    $("#flyout").classList.add("open");
+  }
+
+  function closeFlyout() {
+    $("#flyScrim").classList.remove("open");
+    $("#flyout").classList.remove("open");
+    state.activeScenario = null;
+    state.activeStage = null;
+    renderLenses();
+    renderStages();
+  }
+
+  function openIntervention() {
+    const sc = SCENARIOS[state.activeScenario];
+    if (!sc) return;
+    const iv = sc.intervention;
+    $("#intvTitle").textContent = iv.title;
+    $("#intvBody").innerHTML = `
+      <section><h4>What we found</h4>${iv.found}</section>
+      <section><h4>Recommended action</h4><p class="intv-action-title">${iv.actionTitle}</p>${iv.action}</section>
+      <section><h4>How we will measure it</h4><ul>${iv.measures.map(m => `<li>${m}</li>`).join("")}</ul></section>
+      <section class="playbook" id="playbookPreview" hidden>
+        <h4 style="margin-bottom:6px;color:var(--blue)">Playbook preview</h4>
+        ${iv.steps.map((s, i) => `<div class="play-step"><span class="play-num">${i + 1}</span><div class="play-copy"><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join("")}
+      </section>`;
+    $("#intvFoot").hidden = state.added[state.activeScenario];
+    $("#intvSuccess").hidden = !state.added[state.activeScenario];
+    $("#intvSuccess").textContent = state.added[state.activeScenario] ? iv.success : "";
+    $("#intvScrim").classList.add("open");
+    $("#intvDrawer").classList.add("open");
+  }
+
+  function closeIntervention() {
+    $("#intvScrim").classList.remove("open");
+    $("#intvDrawer").classList.remove("open");
+  }
+
+  function addToSprint() {
+    const key = state.activeScenario;
+    if (!key) return;
+    state.added[key] = true;
+    const iv = SCENARIOS[key].intervention;
+    $("#intvFoot").hidden = true;
+    $("#intvSuccess").hidden = false;
+    $("#intvSuccess").textContent = iv.success;
+    renderSprints();
+    showToast("Playbook added. Sprint status and evidence window updated.");
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    $("#operatorView").hidden = mode !== "operator";
+    $("#setupView").hidden = mode !== "setup";
+    $$(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function showToast(message) {
+    const toast = $("#toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+
+  function resetDemo() {
+    state.activeScenario = null;
+    state.activeStage = null;
+    state.ledgerMode = "impact";
+    state.ledgerFilter = "All";
+    state.added = { mobilization:false, activation:false, pathways:false };
+    closeIntervention();
+    closeFlyout();
+    setMode("operator");
+    $$("#ledgerMode .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.ledgerMode === "impact"));
+    renderAll();
+    showToast("Demo reset to the original V1 state.");
+  }
+
+  $$(".mode-tab").forEach(tab => tab.addEventListener("click", () => setMode(tab.dataset.mode)));
+  $$("[data-mode-target]").forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.modeTarget)));
+  $("#flyClose").addEventListener("click", closeFlyout);
+  $("#flyScrim").addEventListener("click", closeFlyout);
+  $("#intvClose").addEventListener("click", closeIntervention);
+  $("#intvScrim").addEventListener("click", closeIntervention);
+  $("#previewBtn").addEventListener("click", () => {
+    const preview = $("#playbookPreview");
+    preview.hidden = !preview.hidden;
+    $("#previewBtn").textContent = preview.hidden ? "Preview playbook" : "Hide playbook";
+  });
+  $("#addSprintBtn").addEventListener("click", addToSprint);
+  $("#resetDemo").addEventListener("click", resetDemo);
+  $("#sampleDataBtn").addEventListener("click", () => showToast("Synthetic national-network dataset loaded: 1,482,911 lifecycle events."));
+  $$("#ledgerMode .seg-btn").forEach(btn => btn.addEventListener("click", () => {
+    state.ledgerMode = btn.dataset.ledgerMode;
+    $$("#ledgerMode .seg-btn").forEach(b => b.classList.toggle("active", b === btn));
+    renderLedger();
+  }));
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    if ($("#intvDrawer").classList.contains("open")) closeIntervention();
+    else if ($("#flyout").classList.contains("open")) closeFlyout();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
