@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cX OutcomesOS — The Causal Chain (Interactive)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000000; --gray:#6B6B6D; --green:#89C843; --navy:#425B76;
+    --hairline:#E4E4E6; --navy-tint:#EEF2F7; --muted:#C9C9CC;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{font-family:'Poppins',sans-serif;background:#FFFFFF;color:var(--black);-webkit-font-smoothing:antialiased;overflow:hidden;}
+
+  .app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;max-width:1440px;margin:0 auto;padding:20px 32px 14px;}
+
+  /* ---------- header ---------- */
+  .masthead{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--black);padding-bottom:12px;gap:24px;}
+  .brand{font-size:18px;font-weight:600;white-space:nowrap;}
+  .brand .x{color:var(--green);}
+  .head-title{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+  .head-title .accent{color:var(--navy);}
+  .doc-kicker{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);text-align:right;line-height:1.6;white-space:nowrap;}
+
+  /* ---------- main ---------- */
+  .main{display:grid;grid-template-columns:56px minmax(0,1fr) 400px;gap:20px;min-height:0;padding-top:14px;}
+
+  /* left rail */
+  .rail-left{position:relative;}
+  .rail-left svg{display:block;height:100%;width:56px;}
+
+  /* ---------- chain column ---------- */
+  .chain{display:flex;flex-direction:column;min-height:0;gap:6px;}
+
+  .zone{border:1px solid var(--hairline);border-radius:10px;background:#fff;overflow:hidden;flex:none;transition:border-color .2s;}
+  .zone.cx{border-left:4px solid var(--green);}
+  .zone.monitor{border-style:dashed;border-color:var(--muted);}
+  .zone.open{border-color:var(--navy);}
+  .zone.monitor.open{border-color:var(--gray);}
+
+  .zone-head{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;user-select:none;background:#fff;width:100%;border:none;font-family:inherit;text-align:left;}
+  .zone-head:hover{background:#FAFAFB;}
+  .zone-head:focus-visible{outline:2px solid var(--navy);outline-offset:-2px;}
+  .zone-num{font-size:11px;font-weight:700;color:#fff;background:var(--navy);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
+  .zone.monitor .zone-num{background:var(--muted);}
+  .zone-title{font-size:13.5px;font-weight:600;}
+  .zone.monitor .zone-title{color:var(--gray);}
+  .zone-range{font-size:10.5px;font-weight:600;color:var(--navy);background:var(--navy-tint);border-radius:20px;padding:2px 10px;letter-spacing:.05em;}
+  .zone.monitor .zone-range{color:var(--gray);background:#F4F4F5;}
+  .zone-q{font-size:11.5px;color:var(--gray);font-weight:300;margin-left:auto;text-align:right;max-width:400px;line-height:1.4;}
+  .caret{flex:none;width:18px;height:18px;transition:transform .25s;color:var(--gray);}
+  .zone.open .caret{transform:rotate(90deg);}
+
+  .zone-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .zone.open .zone-body{max-height:600px;overflow-y:auto;}
+  .layers{padding:2px 12px 12px;display:flex;flex-direction:column;gap:5px;}
+
+  .layer{display:grid;grid-template-columns:30px 200px 1fr;gap:12px;align-items:center;padding:8px 12px;border:1px solid var(--hairline);border-radius:7px;background:#fff;cursor:pointer;text-align:left;font-family:inherit;transition:border-color .15s, background .15s;width:100%;}
+  .layer:hover{border-color:var(--navy);background:#FBFCFE;}
+  .layer:focus-visible{outline:2px solid var(--navy);outline-offset:-2px;}
+  .layer.active{border-color:var(--green);background:#FBFDF8;box-shadow:inset 0 0 0 1px var(--green);}
+  .zone.monitor .layer{border-style:dashed;}
+  .lnum{font-size:11px;font-weight:600;color:var(--navy);}
+  .zone.monitor .lnum{color:var(--gray);}
+  .lname{font-size:12.5px;font-weight:600;line-height:1.3;}
+  .lex{font-size:11px;color:var(--gray);font-weight:300;line-height:1.45;}
+
+  /* contractability line */
+  .contract-line{flex:none;display:flex;align-items:center;gap:12px;padding:4px 2px;cursor:pointer;user-select:none;border:none;background:none;font-family:inherit;width:100%;text-align:left;}
+  .contract-line .rule{flex:1;border-top:3px solid var(--green);}
+  .contract-line .label{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+  .contract-line .label .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+  .contract-line:hover .label{color:var(--navy);}
+  .contract-line:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px;}
+
+  /* ---------- detail panel ---------- */
+  .panel{border:1px solid var(--hairline);border-radius:12px;padding:20px 22px;overflow-y:auto;min-height:0;background:#fff;display:flex;flex-direction:column;}
+  .panel-kicker{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .panel-kicker .pd{width:8px;height:8px;border-radius:50%;background:var(--navy);flex:none;}
+  .panel-kicker.green .pd{background:var(--green);}
+  .panel-kicker.gray .pd{background:var(--muted);}
+  .panel h2{font-size:19px;font-weight:700;line-height:1.25;letter-spacing:-.01em;margin-bottom:4px;}
+  .panel h2 .accent{color:var(--navy);}
+  .panel .sub{font-size:12px;color:var(--gray);font-weight:300;line-height:1.6;margin-bottom:14px;}
+  .panel .block{border-top:1px solid var(--hairline);padding:12px 0;}
+  .panel .block h5{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+  .panel .block p{font-size:12.5px;font-weight:300;line-height:1.6;color:var(--black);}
+  .panel .block p strong{font-weight:500;}
+  .panel .block p em{color:var(--gray);}
+  .panel .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .pill{font-size:11px;font-weight:400;color:var(--black);background:var(--navy-tint);border-radius:20px;padding:3px 11px;}
+  .pill.g{background:#F2F9E8;}
+  .pill.m{background:#F4F4F5;color:var(--gray);}
+
+  .tier-badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;border-radius:20px;padding:4px 12px;margin:2px 6px 2px 0;}
+  .tier-badge .td{width:7px;height:7px;border-radius:50%;flex:none;}
+  .tier-badge.commit{background:var(--navy-tint);border:1px solid #D5DEE9;}
+  .tier-badge.commit .td{background:var(--green);}
+  .tier-badge.report{background:#fff;border:2px dashed var(--muted);color:var(--gray);}
+  .tier-badge.report .td{background:var(--muted);}
+
+  /* pattern sentence in panel */
+  .pattern-sentence{font-size:14px;font-weight:300;line-height:1.9;}
+  .pattern-sentence .slot{font-weight:600;border-bottom:2.5px solid var(--green);padding:0 1px;}
+  .pattern-sentence .slot.navy{border-bottom-color:var(--navy);}
+
+  /* home grid of tier cards */
+  .tier-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:6px;}
+  .tier-card{border-radius:9px;padding:11px 14px;font-size:11.5px;line-height:1.5;cursor:pointer;border:1px solid #D5DEE9;background:var(--navy-tint);text-align:left;font-family:inherit;transition:border-color .15s;}
+  .tier-card:hover{border-color:var(--navy);}
+  .tier-card:focus-visible{outline:2px solid var(--navy);outline-offset:-2px;}
+  .tier-card.report{background:#fff;border:2px dashed var(--muted);}
+  .tier-card h4{font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+  .tier-card h4::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);flex:none;}
+  .tier-card.report h4::before{background:var(--muted);}
+  .tier-card .lv{font-size:9.5px;font-weight:600;letter-spacing:.1em;color:var(--gray);text-transform:uppercase;display:block;margin-bottom:3px;}
+  .tier-card p{color:var(--gray);font-weight:300;}
+
+  .back-btn{margin-top:auto;align-self:flex-start;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);background:none;border:1.5px solid var(--navy);border-radius:20px;padding:6px 16px;cursor:pointer;margin-top:16px;}
+  .back-btn:hover{background:var(--navy-tint);}
+  .back-btn:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+
+  /* footer */
+  .footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--hairline);padding-top:8px;margin-top:10px;font-size:10px;color:var(--gray);}
+  .footer .tag{font-weight:600;color:var(--black);}
+
+  @media (max-width:1080px){
+    body{overflow:auto;}
+    .app{height:auto;}
+    .main{grid-template-columns:1fr;}
+    .rail-left{display:none;}
+    .panel{order:-1;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="masthead">
+    <div class="brand">congruent<span class="x">X</span></div>
+    <div class="head-title">An outcome is credible only when it has <span class="accent">lineage.</span></div>
+    <div class="doc-kicker">OutcomesOS · The Causal Chain<br>Interactive · v2</div>
+  </div>
+
+  <div class="main">
+
+    <!-- LEFT RAIL -->
+    <div class="rail-left">
+      <svg viewBox="0 0 56 760" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <line x1="16" y1="18" x2="16" y2="726" stroke="#425B76" stroke-width="2"/>
+        <polygon points="16,740 10,726 22,726" fill="#425B76"/>
+        <text x="6" y="375" transform="rotate(-90 6 375)" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9.5" font-weight="600" letter-spacing="2.5" fill="#425B76">DISCOVER — FORWARD</text>
+        <line x1="40" y1="740" x2="40" y2="32" stroke="#89C843" stroke-width="2"/>
+        <polygon points="40,18 34,32 46,32" fill="#89C843"/>
+        <text x="52" y="375" transform="rotate(-90 52 375)" text-anchor="middle" font-family="Poppins,sans-serif" font-size="9.5" font-weight="600" letter-spacing="2.5" fill="#6B6B6D">DEFINE — BACKWARD</text>
+      </svg>
+    </div>
+
+    <!-- CHAIN -->
+    <div class="chain" id="chain"></div>
+
+    <!-- DETAIL PANEL -->
+    <div class="panel" id="panel"></div>
+
+  </div>
+
+  <div class="footer">
+    <div class="tag">Modern CRM. Active Agents. Verified Outcomes.</div>
+    <div>Click a zone to expand · click a layer for detail · congruentX OutcomesOS 2026</div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  zones: [
+    {
+      id:"A", cls:"", title:"Strategic Alignment", range:"Layers 01–04",
+      q:"Which executive priority, which economic lever, whose motion?",
+      panel:{
+        kicker:"Zone A · Strategic Alignment", accent:"",
+        heading:"From the boardroom to a motion someone actually runs.",
+        sub:"Outcome credibility starts before technology. A Board objective is translated into economic levers, divisional contributions, and the repeatable go-to-market motion in scope — before any gate is defined.",
+        blocks:[
+          {h:"Why it exists", p:"It prevents vague outcome language. Both parties agree which economic levers matter, which divisions influence them, and which motions are in scope — before anything is contracted."},
+          {h:"Failure mode it prevents", p:"Jumping straight from “grow revenue” to “implement CRM.” Without this zone, the program has no defensible link to what the executive team actually cares about."}
+        ]
+      },
+      layers:[
+        {n:"01", name:"Board objective", small:"What the Board must produce", ex:"Profitable growth, EBITDA, revenue productivity, retention, forecast confidence.",
+          panel:{heading:"Board objective", sub:"The strategic result the company must produce — financial, market, risk, or operating.",
+          blocks:[{h:"Question answered", p:"What does the Board or executive team care about?"},
+                  {h:"Examples", pills:["Profitable growth","EBITDA","Revenue productivity","Retention","Forecast confidence"]},
+                  {h:"Why it anchors the chain", p:"Every intervention downstream must trace back here. If it cannot, the work is platform activity detached from executive value."}]}},
+        {n:"02", name:"Enterprise value driver", small:"The economic lever behind it", ex:"Revenue per seller, NRR, margin, cost-to-serve, pipeline conversion.",
+          panel:{heading:"Enterprise value driver", sub:"Translates the objective into economic mechanics. Each driver has different owners and different intervention points.",
+          blocks:[{h:"Question answered", p:"Which economic lever expresses the objective?"},
+                  {h:"Examples", pills:["Revenue per seller","NRR","Gross margin","Cost-to-serve","Pipeline conversion","Cycle time"]},
+                  {h:"The move it forces", p:"“Profitable growth” becomes revenue per seller, win rate, discount rate — levers a business can actually manage."}]}},
+        {n:"03", name:"Division objective", small:"Who contributes to the driver", ex:"Commercial Sales, Customer Success, Service, Channel, Operations.",
+          panel:{heading:"Division objective", sub:"Large outcomes are rarely owned by one team. Each division receives a contribution objective specific enough to operate.",
+          blocks:[{h:"Question answered", p:"Which business area contributes to the value driver?"},
+                  {h:"Examples", pills:["Commercial Sales","Customer Success","Service","Channel","Operations"]},
+                  {h:"Why it matters", p:"The same Board objective demands different contributions — Sales may own new-logo conversion while Success owns retention and expansion."}]}},
+        {n:"04", name:"GTM motion", small:"The repeatable pattern in scope", ex:"Acquire, onboard, adopt, renew, expand, serve, recruit.",
+          panel:{heading:"GTM motion", sub:"A repeatable commercial or operating pattern. Different motions break in different places and need different roles, data, and interventions.",
+          blocks:[{h:"Question answered", p:"Which motion creates or constrains the objective?"},
+                  {h:"Examples", pills:["Acquire","Onboard","Adopt","Renew","Expand","Serve","Recruit","Quote","Recover"]},
+                  {h:"Scope discipline", p:"Isolating the motion that matters most keeps the engagement from trying to fix everything at once."}]}}
+      ]
+    },
+    {
+      id:"B", cls:"", title:"Operating Design", range:"Layers 05–08",
+      q:"Where does the motion break, who does the work, what blocks the job?",
+      panel:{
+        kicker:"Zone B · Operating Design", accent:"",
+        heading:"Where executive language becomes real work.",
+        sub:"The model moves from strategy to operating design: where the lifecycle breaks, which role pair does the work, what job they must complete, and what friction blocks it today.",
+        blocks:[
+          {h:"Why role pairs, not personas", p:"A persona is too broad to design from. An AE working an economic buyer is different work from a manager inspecting a seller. The pair forces the design to reflect real work, not department labels."},
+          {h:"The layer that matters most", p:"Friction (Layer 08) is the shared spine between the cost estimate and the outcome case. It is where DISCOVER hands off and DEFINE picks up."}
+        ]
+      },
+      layers:[
+        {n:"05", name:"Bowtie stage", small:"Where in the lifecycle it breaks", ex:"Target, engage, qualify, win, onboard, adopt, renew, expand.",
+          panel:{heading:"Bowtie stage", sub:"The customer lifecycle as one connected system — not a funnel that ends at close. Many outcomes are created or destroyed after the initial sale.",
+          blocks:[{h:"Question answered", p:"Where in the customer lifecycle does the motion break?"},
+                  {h:"Stages", pills:["Target","Engage","Qualify","Win","Onboard","Adopt","Renew","Expand"]},
+                  {h:"Source", p:"Winning by Design Revenue Architecture — the recurring-revenue view of the lifecycle."}]}},
+        {n:"06", name:"Role pair", small:"The role and its counterparty", ex:"AE × buyer, CSM × champion, manager × seller, agent × customer.",
+          panel:{heading:"Role pair", sub:"The internal role trying to move a motion and the counterparty they interact with.",
+          blocks:[{h:"Question answered", p:"Who is doing the work, and with whom?"},
+                  {h:"Examples", pills:["AE × economic buyer","CSM × champion","Manager × seller","Service agent × customer","Impl. lead × sponsor"]},
+                  {h:"Why it matters", p:"The business case is shaped in AE × buyer. Forecast quality is shaped in manager × seller. Design at the pair, and the work stays real."}]}},
+        {n:"07", name:"Job to be done", small:"The progress the role must create", ex:"Quantify impact, detect risk, complete handoff, create the expansion plan.",
+          panel:{heading:"Job to be done", sub:"The business progress the role is trying to create — not a feature request, not a system task.",
+          blocks:[{h:"The format", p:"“When I am [role], working with [counterparty], at [stage], I am trying to [business job] so that [business outcome happens].”"},
+                  {h:"Example", p:"When I am an AE working with an economic buyer during discovery, I am trying to quantify impact and align the decision path — so the opportunity progresses without discounting or delay.", em:true},
+                  {h:"Source", p:"Christensen and Ulwick — jobs-to-be-done."}]}},
+        {n:"08", name:"Friction pattern", small:"What prevents the job today", ex:"Context, capture, handoff, inspection, and action friction.",
+          panel:{heading:"Friction pattern", sub:"The operating problem preventing the job from being completed well. The shared spine of the cost estimate and the outcome case.",
+          blocks:[{h:"The five patterns", pills:["Context friction","Capture friction","Handoff friction","Inspection friction","Action friction"]},
+                  {h:"The design question", p:"Not “what feature should we add?” but “which friction pattern prevents the work from producing the outcome — and how do we remove it without adding burden to the user?”"},
+                  {h:"Why it is the test", p:"The second clause of every outcome statement lives here. No specific friction tied to a specific role's job means no outcome — only a feature request."}]}}
+      ]
+    },
+    {
+      id:"C", cls:"cx", title:"cX Intervention Engine", range:"Layers 09–11",
+      q:"Collect · harmonize · interpret · act — delivered at the moment of work",
+      panel:{
+        kicker:"Zone C · cX Intervention Engine", accent:"green",
+        heading:"The four moves that create the causal link.",
+        sub:"congruentX removes friction from the data-to-action loop: collect signals in the flow of work, harmonize them into business context, interpret them into role-specific judgment support, and act at the moment that matters.",
+        blocks:[
+          {h:"Collect", p:"Capture conversations, activities, commitments, and next steps from the work itself — not after-the-fact manual entry. Most CRM data problems are workflow design problems, not motivation problems."},
+          {h:"Harmonize", p:"Connect signals to accounts, contacts, opportunities, contracts, usage, and lifecycle stages so AI and executives share one understanding of the business."},
+          {h:"Interpret", p:"Role-specific judgment support: deal risk, missing stakeholders, renewal risk, coaching priorities — not generic AI."},
+          {h:"Act", p:"Push guidance, drafts, tasks, and escalation into the moment where the role already works. The human keeps judgment; the system carries repeatable work."}
+        ]
+      },
+      layers:[
+        {n:"09", name:"Data & context", small:"Signals collected and harmonized", ex:"Account, contact, activity, conversation, service, contract, usage, renewal.",
+          panel:{heading:"Data & context", sub:"The signals that must be collected and connected to business entities before any agent can reason usefully.",
+          blocks:[{h:"Question answered", p:"What signals must be collected and harmonized?"},
+                  {h:"Signal types", pills:["Account","Contact","Activity","Conversation","Service","Contract","Product","Usage","Renewal"]},
+                  {h:"How", p:"CRM foundation, Dataverse/Fabric patterns, integration, data quality rules, and a business context layer / ontology that models what things mean."}]}},
+        {n:"10", name:"cX intervention", small:"The capability that changes the work", ex:"CoreOS, AgentOS, RevOS, Dialogue Copilot, data factory, ontology.",
+          panel:{heading:"cX intervention", sub:"The specific capability applied against the friction — platform change, data model change, or agent.",
+          blocks:[{h:"Capability map", pills:["cX CoreOS","cX AgentOS","cX RevOS","cX OutcomesOS","Dialogue Copilot","cxDataFactory","Ontology","Adoption monitor"]},
+                  {h:"Two-tier framing", p:"Microsoft Foundation (cX-configured) vs. the cX Agent Library. Native platform or Copilot capability is never re-badged as a cX agent."},
+                  {h:"Derived, not cataloged", p:"Agents are derived from the chain — one per consequence of the root cause — which is the defensible answer to “why these three.”"}]}},
+        {n:"11", name:"Moment of work", small:"Where the capability lands", ex:"Before the call, during, after, inspection, escalation, renewal review.",
+          panel:{heading:"Moment of work", sub:"Insights that require manual translation do not change behavior. Value is delivered where the role is already working.",
+          blocks:[{h:"The moments", pills:["Before the meeting","During discovery","After the call","Deal inspection","Escalation","Renewal review"]},
+                  {h:"The division of labor", p:"The system carries research, capture, summaries, updates, drafts, and alerts. The human keeps meeting strategy, customer commitments, exceptions, and approvals."}]}}
+      ]
+    },
+    {
+      id:"D", cls:"cx", title:"Proof & Verification", range:"Layers 12–13",
+      q:"Not verified, not invoiced",
+      panel:{
+        kicker:"Zone D · Proof & Verification", accent:"green",
+        heading:"Where the chain becomes contractable.",
+        sub:"Telemetry proves the new motion is real, and operating outcomes show the first movement. Payment attaches here — to what congruentX can perform, instrument, and evidence.",
+        blocks:[
+          {h:"Three safeguards", p:"Source independence — telemetry originates in the client's own environment. Shared visibility — one scoreboard, no partner-only version. Auditability — evidence packages reproducible from source data."},
+          {h:"The miss path", p:"A missed gate is not hidden or invoiced on a calendar date. The tranche is held, remediation runs at cX cost where cX-controlled, the gate is remeasured, and payment releases only on verified attainment."}
+        ]
+      },
+      layers:[
+        {n:"12", name:"Telemetry gate", small:"Evidence the new motion is real", ex:"Usage, quality, acceptance, completion, timeliness, override rate.",
+          panel:{heading:"Telemetry gate", sub:"The proof that work is happening differently — from client-owned source logs, on a shared scoreboard, with evidence packages.",
+          blocks:[{h:"Signals", pills:["Usage","Quality","Acceptance","Completion","Timeliness","Override rate","Data completeness"]},
+                  {h:"The nine-field spec", p:"Every gate carries rationale, metric definition, data source and lineage, baseline methodology, measurement window, calculation and edge cases, evidence artifact, sign-off workflow, and a miss/cure/remeasure path."},
+                  {h:"Thresholds", p:"Never invented before the environment is examined. Every threshold is set at Diagnose and amendable only through change control.", em:true}]}},
+        {n:"13", name:"Operating outcome", small:"What should improve first — 4a vs 4b", ex:"4a instrumented: leak reportable by cause. 4b moved: the rate improves within a named cohort.",
+          panel:{heading:"Operating outcome — the 4a / 4b split", sub:"One layer, two opposite risk profiles. Conflating them is the single most common drafting error.",
+          blocks:[{h:"4a — Instrumented", p:"“The leak is reportable by cause.” “Elapsed time is measured end to end.” congruentX built the ability to see it. Fully cX-controlled — a Capability Gate. Commit freely.", tier:"commit", tierLabel:"Capability Gate · commit"},
+                  {h:"4b — Moved", p:"“The per-referral rate improved.” The number itself moved. Shared with the client — an Engagement Gate at best, and only with the three rules: rate never total, named cohort with attrition rules, materiality trigger.", tier:"commit", tierLabel:"Engagement Gate · three rules"},
+                  {h:"Why the split exists", p:"This conflation is exactly how a partner ends up contracted against a business result by accident — “measured” and “instrumented” are safe; “improved” needs work."}]}}
+      ]
+    }
+  ],
+  monitorZone:{
+    id:"E", cls:"monitor", title:"Outcome Realization — monitored & reported", range:"Layers 14–15",
+    q:"Lagging results the gates are designed to drive",
+    panel:{
+      kicker:"Zone E · Outcome Realization", accent:"gray",
+      heading:"What the work is for — measured, never warranted.",
+      sub:"Business outcomes lag behavior change. They are monitored and reported at every Quarterly Outcome Review against Diagnose-locked baselines, with the confounder register alongside — so movement is interpreted honestly by both parties.",
+      blocks:[
+        {h:"Why not committed", p:"Revenue outcomes are influenced by more variables than any partner controls — market demand, pricing, product fit, competitive moves, client staffing. The fair structure contracts against the operating drivers and monitors the results they are designed to produce."},
+        {h:"Do not drop them", p:"The client is buying a business result, and a document that never mentions one reads as evasive. Name more of them, group them, and label the group clearly — visibility without warranty."}
+      ]
+    },
+    layers:[
+      {n:"14", name:"Business outcome", small:"The lagging KPI", ex:"Win rate, cycle time, deal size, NRR, churn, forecast accuracy, cost-to-serve.",
+        panel:{heading:"Business outcome", sub:"The lagging indicators the executive team ultimately cares about.",
+        blocks:[{h:"Examples", pills:["Win rate","Cycle time","Deal size","NRR","Churn","Forecast accuracy","Cost-to-serve"], muted:true},
+                {h:"How it is handled", p:"Measured and reported at each Quarterly Outcome Review with relevant confounders. Not a committed outcome and not warranted.", em:true},
+                {h:"Lag expectation", p:"Each outcome carries an expected lag — the time between behavior change and expected KPI movement — so no one reads a quiet quarter as failure."}]}},
+      {n:"15", name:"Board impact", small:"The objective, laddered back up", ex:"Profitable growth, better EBITDA, higher productivity, lower risk.",
+        panel:{heading:"Board impact", sub:"The final translation — keeping the linkage visible so the program never drifts into platform activity detached from executive value.",
+        blocks:[{h:"Examples", pills:["Profitable growth","Better EBITDA","Higher productivity","Lower risk","Stronger predictability"], muted:true},
+                {h:"The loop closes", p:"Layer 15 ladders back to Layer 01. The chain is a loop: the Board objective that started the engagement is the impact the Quarterly Outcome Review keeps checking against."}]}}
+    ]
+  },
+  contractLine:{
+    panel:{
+      kicker:"The contractability line", accent:"green",
+      heading:"Everything above can carry a gate. Everything below is what the work is for.",
+      sub:"The line between what congruentX can perform, instrument, and evidence — and the business results those drivers are designed to produce.",
+      blocks:[
+        {h:"Above the line — Levels 1–4", p:"Live capability, adoption, behavior change, and operating movement. congruentX can perform and evidence these, so payment attaches here."},
+        {h:"Below the line — Levels 5–6", p:"Business KPI movement and Board impact. Monitored, reported with confounders, expressly excluded from commitment."},
+        {h:"The tell", p:"Ask who could make you fail. If the honest answer includes the client, their customers, or the market — it is below the line. If the only party who could make you fail is congruentX — it is above.", em:true},
+        {h:"The four tiers", tiers:true}
+      ]
+    }
+  },
+  home:{
+    kicker:"OutcomesOS · The Causal Chain",
+    heading:"Fifteen layers. Two directions. One line.",
+    sub:"DISCOVER runs the chain forward — objective down to friction. DEFINE runs it backward — from the results claimed to the operating outcomes congruentX can control, instrument, and contract on. Click any zone or layer on the left to explore it.",
+    blocks:[
+      {h:"The chain, compressed to one sentence", sentence:true},
+      {h:"The four contractable tiers", tiers:true}
+    ]
+  }
+};
+
+const TIERS = [
+  {cls:"", name:"Delivery Milestone", lv:"Contractable", p:"cX built it and shipped it. Schedule and execution risk only."},
+  {cls:"", name:"Capability Gate", lv:"Levels 1 · 4a — Contractable", p:"Runs in production on live data; the driver is diagnosable. Functional."},
+  {cls:"", name:"Engagement Gate", lv:"Levels 2 · 3 · 4b — With the three rules", p:"The cohort uses it and works differently. Easy & enjoyable. Always a rate, never a total."},
+  {cls:"report", name:"Business Result", lv:"Levels 5 · 6 — Never committed", p:"Monitored, reported at each QOR with confounders named, expressly excluded from commitment."}
+];
+
+const chainEl = document.getElementById('chain');
+const panelEl = document.getElementById('panel');
+let activeLayerBtn = null;
+
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+
+function renderTierGrid(){
+  const g = el('div','tier-grid');
+  TIERS.forEach(t=>{
+    const c = el('button','tier-card '+t.cls);
+    c.innerHTML = `<h4>${t.name}</h4><span class="lv">${t.lv}</span><p>${t.p}</p>`;
+    c.addEventListener('click',()=>showContractLine());
+    g.appendChild(c);
+  });
+  return g;
+}
+
+function renderPanel(cfg){
+  panelEl.innerHTML='';
+  const kick = el('div','panel-kicker '+(cfg.accent||''),`<span class="pd"></span>${cfg.kicker}`);
+  panelEl.appendChild(kick);
+  panelEl.appendChild(el('h2',null,cfg.heading));
+  if(cfg.sub) panelEl.appendChild(el('p','sub',cfg.sub));
+  (cfg.blocks||[]).forEach(b=>{
+    const blk = el('div','block');
+    blk.appendChild(el('h5',null,b.h));
+    if(b.sentence){
+      blk.appendChild(el('p','pattern-sentence',
+        `The client needs to <span class="slot navy">complete a job a named role is trying to do</span> — but <span class="slot navy">a specific shortfall, friction, or missing insight blocks it</span> — so we implement <span class="slot">the specific platform change, data model change, or agent</span> — to make it <span class="slot">functional, easy, and enjoyable</span>.`));
+      blk.appendChild(el('p','sub','The second clause is the test. Three outcomes per engagement; four is the absolute ceiling.'));
+    } else if(b.tiers){
+      blk.appendChild(renderTierGrid());
+    } else {
+      if(b.tierLabel){
+        blk.appendChild(el('span','tier-badge '+b.tier,`<span class="td"></span>${b.tierLabel}`));
+      }
+      const p = el('p',null,b.em?`<em>${b.p}</em>`:b.p);
+      blk.appendChild(p);
+      if(b.pills){
+        const row = el('div','pill-row');
+        b.pills.forEach(x=>row.appendChild(el('span','pill'+(b.muted?' m':''),x)));
+        blk.appendChild(row);
+      }
+    }
+    panelEl.appendChild(blk);
+  });
+  if(cfg.kicker !== DATA.home.kicker){
+    const back = el('button','back-btn','← Overview');
+    back.addEventListener('click',showHome);
+    panelEl.appendChild(back);
+  }
+  panelEl.scrollTop = 0;
+}
+
+function showHome(){
+  clearActive();
+  renderPanel({kicker:DATA.home.kicker, heading:DATA.home.heading, sub:DATA.home.sub, blocks:DATA.home.blocks});
+}
+function showContractLine(){
+  clearActive();
+  renderPanel(DATA.contractLine.panel);
+}
+function clearActive(){
+  if(activeLayerBtn){activeLayerBtn.classList.remove('active');activeLayerBtn=null;}
+}
+
+function buildZone(z){
+  const zone = el('div','zone '+z.cls);
+  zone.dataset.id = z.id;
+  const head = el('button','zone-head');
+  head.setAttribute('aria-expanded','false');
+  head.innerHTML = `<span class="zone-num">${z.id}</span><span class="zone-title">${z.title}</span><span class="zone-range">${z.range}</span><span class="zone-q">${z.q}</span>
+  <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg>`;
+  const body = el('div','zone-body');
+  const layers = el('div','layers');
+  z.layers.forEach(L=>{
+    const btn = el('button','layer');
+    btn.innerHTML = `<span class="lnum">${L.n}</span><span class="lname">${L.name}<small style="display:block;font-weight:300;font-size:10.5px;color:var(--gray)">${L.small}</small></span><span class="lex">${L.ex}</span>`;
+    btn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      clearActive();
+      btn.classList.add('active'); activeLayerBtn = btn;
+      renderPanel({kicker:`Layer ${L.n} · Zone ${z.id}`, accent:z.cls==='cx'?'green':(z.cls==='monitor'?'gray':''), heading:L.panel.heading, sub:L.panel.sub, blocks:L.panel.blocks});
+    });
+    layers.appendChild(btn);
+  });
+  body.appendChild(layers);
+  head.addEventListener('click',()=>{
+    const wasOpen = zone.classList.contains('open');
+    document.querySelectorAll('.zone.open').forEach(o=>{o.classList.remove('open');o.querySelector('.zone-head').setAttribute('aria-expanded','false');});
+    if(!wasOpen){
+      zone.classList.add('open');
+      head.setAttribute('aria-expanded','true');
+      clearActive();
+      renderPanel({kicker:z.panel.kicker, accent:z.panel.accent, heading:z.panel.heading, sub:z.panel.sub, blocks:z.panel.blocks});
+    } else {
+      showHome();
+    }
+  });
+  zone.appendChild(head);
+  zone.appendChild(body);
+  return zone;
+}
+
+DATA.zones.forEach(z=>chainEl.appendChild(buildZone(z)));
+
+const cl = el('button','contract-line');
+cl.innerHTML = `<span class="rule"></span><span class="label"><span class="dot"></span>The contractability line</span><span class="rule"></span>`;
+cl.addEventListener('click',showContractLine);
+chainEl.appendChild(cl);
+
+chainEl.appendChild(buildZone(DATA.monitorZone));
+
+showHome();
+</script>
+</body>
+</html>
