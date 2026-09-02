@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outcome-Based Pricing — Microsoft + congruentX</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--black:#000;--gray:#6B6B6D;--green:#89C843;--navy:#425B76;--hairline:#E4E4E6;--tint:#EEF2F7;--gtint:#F4FAEB;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Poppins',sans-serif;background:#fff;color:var(--black);-webkit-font-smoothing:antialiased;}
+  .page{max-width:1180px;margin:0 auto;padding:44px 44px 52px;}
+
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--black);padding-bottom:16px;}
+  .brand{font-size:19px;font-weight:600;}
+  .brand .x{color:var(--green);}
+  .brand .ms{color:var(--gray);font-weight:400;font-size:13px;margin-left:10px;}
+  .kicker{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gray);text-align:right;line-height:1.7;}
+
+  .burn{font-size:14px;font-weight:300;color:var(--gray);margin-top:30px;max-width:820px;line-height:1.6;font-style:italic;}
+  h1{font-size:33px;font-weight:700;letter-spacing:-.015em;line-height:1.15;margin:10px 0 10px;max-width:860px;}
+  h1 .accent{color:var(--navy);}
+  .position{font-size:15px;font-weight:300;line-height:1.7;max-width:900px;color:var(--black);border-left:4px solid var(--green);padding:6px 0 6px 20px;margin:18px 0 8px;}
+  .position strong{font-weight:600;}
+  .not-line{font-size:12.5px;color:var(--gray);font-weight:300;max-width:900px;line-height:1.6;margin-top:10px;}
+  .not-line strong{color:var(--black);font-weight:500;}
+
+  .sec{margin-top:38px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--black);padding-bottom:8px;margin-bottom:16px;}
+  .sec-head h2{font-size:16px;font-weight:700;letter-spacing:.02em;}
+  .sec-head .q{font-size:12px;color:var(--gray);font-weight:300;margin-left:auto;}
+
+  /* three-column mechanism */
+  .mech{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .mcol{border:1px solid var(--hairline);border-radius:10px;padding:16px 18px;}
+  .mcol.bet{border-top:4px solid var(--navy);}
+  .mcol.track{border-top:4px solid var(--green);}
+  .mcol.do{border-top:4px solid var(--black);}
+  .mcol h3{font-size:13px;font-weight:700;margin-bottom:2px;}
+  .mcol .tagline{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;display:block;}
+  .mcol ul{list-style:none;}
+  .mcol li{font-size:12px;font-weight:300;line-height:1.5;padding:5px 0 5px 16px;position:relative;border-top:1px solid var(--hairline);}
+  .mcol li:first-child{border-top:none;}
+  .mcol li::before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;border-radius:50%;}
+  .mcol.bet li::before{background:var(--navy);}
+  .mcol.track li::before{background:var(--green);}
+  .mcol.do li::before{background:var(--black);}
+  .mcol li strong{font-weight:500;}
+  .mcol .foot{font-size:11px;color:var(--gray);font-weight:300;line-height:1.55;margin-top:10px;border-top:1px solid var(--hairline);padding-top:8px;}
+  .mcol .foot strong{color:var(--black);font-weight:500;}
+
+  /* scenarios */
+  .scenario{border:1px solid var(--hairline);border-radius:12px;margin-bottom:18px;overflow:hidden;}
+  .sc-head{display:flex;align-items:center;gap:12px;padding:13px 20px;background:var(--tint);}
+  .sc-num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;}
+  .sc-title{font-size:14px;font-weight:700;}
+  .sc-who{font-size:11px;color:var(--gray);font-weight:300;margin-left:auto;text-align:right;}
+  table{width:100%;border-collapse:collapse;}
+  th{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);text-align:left;padding:10px 20px 6px;border-bottom:1px solid var(--hairline);}
+  th.pay{color:var(--navy);}
+  td{font-size:12px;font-weight:300;line-height:1.55;padding:10px 20px;vertical-align:top;border-bottom:1px solid var(--hairline);width:33.3%;}
+  tr:last-child td{border-bottom:none;}
+  td strong{font-weight:500;}
+  td .pay-tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;border-radius:20px;padding:2px 10px;margin-bottom:5px;}
+  .pay-tag.milestone{background:var(--tint);color:var(--navy);}
+  .pay-tag.adoption{background:var(--gtint);color:#4a7a1e;}
+  .pay-tag.operating{background:#fff;color:#4a7a1e;border:1.5px solid var(--green);}
+  .pay-tag.reported{background:#F4F4F5;color:var(--gray);}
+  td .metric{display:block;font-size:11px;color:var(--gray);margin-top:4px;}
+
+  /* payment model strip */
+  .paymodel{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;border:1px solid var(--hairline);border-radius:12px;overflow:hidden;}
+  .pcol{padding:18px 20px;border-left:1px solid var(--hairline);}
+  .pcol:first-child{border-left:none;}
+  .pcol h4{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .pcol h4 .pd{width:8px;height:8px;border-radius:50%;flex:none;}
+  .pcol.p1 h4 .pd{background:var(--navy);}
+  .pcol.p2 h4 .pd{background:var(--green);}
+  .pcol.p2b h4 .pd{background:#fff;border:2.5px solid var(--green);width:7px;height:7px;}
+  .pcol.p3 h4 .pd{background:#C9C9CC;}
+  .pcol .plabel{font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:8px;}
+  .pcol p{font-size:11.5px;font-weight:300;line-height:1.6;color:var(--black);}
+  .pcol.p3{background:#FAFAFB;}
+  .pledge{margin-top:14px;background:var(--navy);color:#fff;border-radius:12px;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  .pledge .big{font-size:15px;font-weight:600;}
+  .pledge .big .g{color:var(--green);}
+  .pledge .small{font-size:11px;font-weight:300;color:#C9D4E0;max-width:480px;line-height:1.55;text-align:right;}
+
+  .footer{margin-top:36px;display:flex;justify-content:space-between;font-size:10px;color:var(--gray);border-top:1px solid var(--hairline);padding-top:12px;}
+
+  /* CTA band */
+  .cta-band{margin-top:26px;display:grid;grid-template-columns:1.5fr 1fr;gap:14px;}
+  .cta-main{border:1px solid var(--hairline);border-top:4px solid var(--green);border-radius:12px;padding:20px 24px;}
+  .cta-alt{border:1px solid var(--hairline);border-radius:12px;padding:20px 24px;background:#FAFAFB;}
+  .cta-label{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gray);margin-bottom:6px;}
+  .cta-big{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;}
+  .cta-band p{font-size:12.5px;font-weight:300;line-height:1.6;color:var(--black);}
+  .cta-band p strong{font-weight:600;}
+  .footer .tag{font-weight:600;color:var(--black);}
+
+  @media print{.page{padding:22px;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.scenario{break-inside:avoid;}.sec{break-inside:avoid;}}
+  @media (max-width:900px){.mech,.paymodel,.cta-band{grid-template-columns:1fr;}.pcol{border-left:none;border-top:1px solid var(--hairline);}h1{font-size:25px;}td{display:block;width:100%;}th{display:none;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <div class="brand">congruent<span class="x">X</span><span class="ms">+ Microsoft</span></div>
+    <div class="kicker">Managed Outcomes · Outcome-Based Pricing<br>Joint Customer Asset · Draft</div>
+  </div>
+
+  <p class="burn">You've heard the outcome promise before. Then the invoices arrived on schedule — and the outcomes didn't.</p>
+  <h1>Outcome-based pricing means the fee describes <span class="accent">how we get paid</span> — not how we market.</h1>
+
+  <p class="position">Microsoft provides the technology platform. <strong>congruentX accepts accountability for turning that platform into agreed technical and business outcomes.</strong> We define those outcomes with you up front, attach congruentX's fees to achieving them, and verify the results through telemetry you can see. For agents, the work does not stop at deployment — we monitor, govern, and tune them so value does not stop at go-live.</p>
+
+  <p class="not-line"><strong>What this is not:</strong> it is not unlimited upside, and it is not a discount scheme. A $1M engagement remains a $1M engagement. What changes is <strong>when payment releases</strong> — attached to specific, verifiable outcome milestones instead of hours billed or calendar dates reached. Many firms market "outcomes" while billing for time. The test is simple: ask any partner to show you the milestone that releases their next invoice.</p>
+
+  <!-- MECHANISM -->
+  <div class="sec">
+    <div class="sec-head"><h2>How it works</h2><div class="q">What we bet on · what we track · what we do</div></div>
+    <div class="mech">
+      <div class="mcol bet">
+        <h3>What you stop paying for on faith</h3>
+        <span class="tagline">Fees attach here — what we bet on</span>
+        <ul>
+          <li><strong>Technical outcomes live.</strong> Platform in production, data migrated and validated, integrations cut over, legacy retired.</li>
+          <li><strong>Agents in production.</strong> Named agents deployed on live data, available to target users, emitting telemetry from day one.</li>
+          <li><strong>Your people adopting.</strong> Named users active in the flow of work, measured as a rate — with thresholds agreed before we start measuring.</li>
+        </ul>
+        <div class="foot"><strong>Why these:</strong> they are the drivers the business results depend on — and they are verifiable. If the system isn't live, used, and trusted, no downstream number can be.</div>
+      </div>
+      <div class="mcol track">
+        <h3>What you see, every quarter</h3>
+        <span class="tagline">Reported openly — what we track</span>
+        <ul>
+          <li><strong>Operating movement.</strong> Follow-up speed, data completeness, handoff quality, response time, risk detected earlier.</li>
+          <li><strong>Business results.</strong> Win rate, cycle time, retention, CSAT, cost-to-serve — against baselines set together at the start.</li>
+          <li><strong>The honest context.</strong> Market shifts, staffing changes, pricing moves — the factors that also move these numbers, named alongside them.</li>
+        </ul>
+        <div class="foot"><strong>One scoreboard, both logos.</strong> Telemetry originates in your environment, not ours. There is no partner-only version of performance.</div>
+      </div>
+      <div class="mcol do">
+        <h3>What never becomes your problem</h3>
+        <span class="tagline">Continuing — what we do, not ship and leave</span>
+        <ul>
+          <li><strong>Monitor and govern</strong> every deployed agent: usage, quality, acceptance, override rates.</li>
+          <li><strong>Tune and improve</strong> when signals drift — remediation is our work, at our cost, before it becomes your surprise.</li>
+          <li><strong>Review quarterly.</strong> Outcomes, metrics, and next interventions in a standing business review — not a support ticket queue.</li>
+        </ul>
+        <div class="foot"><strong>The agent rule:</strong> an agent is not done when it ships. It is done when it keeps producing the result it was built for.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIOS -->
+  <div class="sec">
+    <div class="sec-head"><h2>What it looks like by customer type</h2><div class="q">Technical outcomes · business outcomes · how payment attaches</div></div>
+
+    <div class="scenario">
+      <div class="sc-head"><div class="sc-num">1</div><div class="sc-title">CRM Migration — Salesforce to Dynamics 365</div><div class="sc-who">Enterprise moving off legacy CRM spend</div></div>
+      <table>
+        <tr><th>Technical outcomes</th><th>Business outcomes</th><th class="pay">How payment attaches</th></tr>
+        <tr>
+          <td>Dynamics 365 + Dataverse live in production for the named user population. Agreed data migrated, cleansed, and validated. Integrations cut over. Salesforce decommissioned on schedule.<span class="metric">Verified by: go-live sign-off, migration reconciliation report, cutover checklist</span></td>
+          <td>Faster follow-up on pipeline. Cleaner forecast built on trusted data. Lower total CRM cost of ownership. Sales cycle and win-rate movement tracked against pre-migration baselines.<span class="metric">Tracked by: shared scoreboard, quarterly business review</span></td>
+          <td><span class="pay-tag milestone">Milestone</span><br>Fee tranche releases at verified technical go-live — not at a calendar date.<br><span class="pay-tag adoption">Adoption</span><br>A further tranche releases when named users are active at the agreed rate for the agreed window.<br><span class="pay-tag operating">Operating</span><br>Optionally, fee attaches to the work changing: follow-up within SLA and opportunity data completeness, as rates within the named team.<br><span class="pay-tag reported">Reported</span><br>Business results reported openly; they are the point of the work, and we track them with you.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="scenario">
+      <div class="sc-head"><div class="sc-num">2</div><div class="sc-title">Contact Center — Service Modernization + AI</div><div class="sc-who">High-volume service organization (reference: enterprise healthcare)</div></div>
+      <table>
+        <tr><th>Technical outcomes</th><th>Business outcomes</th><th class="pay">How payment attaches</th></tr>
+        <tr>
+          <td>Modern service workspace live for named agents. Case, contact, and interaction data unified. AI assistance and governed agents deployed into the live queue with telemetry from cutover.<span class="metric">Verified by: production deployment, live-data connection, telemetry emitting</span></td>
+          <td>Faster resolution. Fewer transfers and repeat contacts. Better customer-satisfaction scores. Lower cost-to-serve — each tracked against a baseline set before go-live.<span class="metric">Tracked by: resolution and CSAT trends on the shared scoreboard, with context factors named</span></td>
+          <td><span class="pay-tag milestone">Milestone</span><br>Fee attaches to the service platform and agent stack verified live in production.<br><span class="pay-tag adoption">Adoption</span><br>Tranche releases on agent-assist usage and workflow completion by the named team, measured as a rate.<br><span class="pay-tag operating">Operating</span><br>Optionally, fee attaches to case documentation completeness, callbacks within SLA, and AI-suggestion quality staying in band — per active agent.<br><span class="pay-tag reported">Reported</span><br>CSAT, handle time, and cost-to-serve reported quarterly against baseline.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="scenario">
+      <div class="sc-head"><div class="sc-num">3</div><div class="sc-title">Revenue Teams — Agents on the Sales Motion</div><div class="sc-who">B2B revenue organization adding AI to an existing CRM</div></div>
+      <table>
+        <tr><th>Technical outcomes</th><th>Business outcomes</th><th class="pay">How payment attaches</th></tr>
+        <tr>
+          <td>Governed agents live against specific jobs — meeting prep, call capture, pipeline hygiene, deal inspection. Conversation and activity data captured in the flow of work, connected to opportunities.<span class="metric">Verified by: agents in production on live data, available to the named sellers</span></td>
+          <td>More selling time per rep. Complete, inspectable pipeline. Earlier risk detection. Forecast accuracy and win-rate movement tracked from an agreed baseline.<span class="metric">Tracked by: pipeline completeness and follow-up SLAs leading; revenue KPIs lagging</span></td>
+          <td><span class="pay-tag milestone">Milestone</span><br>Fee attaches to the agreed agent roadmap delivered into production.<br><span class="pay-tag adoption">Adoption</span><br>Tranche releases on invocation and output-acceptance rates within the named seller cohort.<br><span class="pay-tag operating">Operating</span><br>Optionally, fee attaches to follow-ups sent within SLA, pipeline field completeness, and stale-opportunity reduction — as rates per active seller.<br><span class="pay-tag reported">Reported</span><br>Revenue-per-rep and forecast metrics reported quarterly — the results the drivers exist to move.</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAYMENT MODEL -->
+  <div class="sec">
+    <div class="sec-head"><h2>The commercial model in one view</h2><div class="q">Four kinds of promise, visible on the page</div></div>
+    <div class="paymodel">
+      <div class="pcol p1">
+        <h4><span class="pd"></span>Verified milestones</h4>
+        <span class="plabel">Fee releases on proof</span>
+        <p>Platform live, data validated, agents in production. Verified through evidence you can audit — deployment records, reconciliation reports, telemetry. If it isn't verified, it isn't invoiced.</p>
+      </div>
+      <div class="pcol p2">
+        <h4><span class="pd"></span>Adoption milestones</h4>
+        <span class="plabel">Fee releases on use</span>
+        <p>Your named users, active at an agreed rate, for an agreed window. Measured fairly: rates within a named team, so your staffing decisions never distort the measure — in either direction.</p>
+      </div>
+      <div class="pcol p2b">
+        <h4><span class="pd"></span>Operating milestones</h4>
+        <span class="plabel">Fee releases on the work changing</span>
+        <p>The behaviors that predict the business results: follow-up within SLA, data completeness, handoffs completed, agent output quality in band — each a rate within the named team, thresholds agreed before measurement begins.</p>
+      </div>
+      <div class="pcol p3">
+        <h4><span class="pd"></span>Business results</h4>
+        <span class="plabel">Tracked and reported</span>
+        <p>Win rate, CSAT, retention, cost-to-serve. These are why the work exists. We baseline them, instrument them, and report them quarterly with the surrounding context — honestly, on a scoreboard both parties see.</p>
+      </div>
+    </div>
+    <div class="pledge">
+      <div class="big">Not verified, <span class="g">not invoiced.</span></div>
+      <div class="small">Each layer predicts the next: live capability makes adoption possible, adoption makes the work change, changed work moves the business numbers. If a milestone is missed, the tranche is held, congruentX remediates, and the milestone is remeasured. Payment releases on verified achievement — never on time passed.</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-band">
+    <div class="cta-main">
+      <div class="cta-label">Where to start</div>
+      <div class="cta-big">Start a Proof Sprint.</div>
+      <p>Define the outcomes and what they're worth — the jobs, the friction, the metrics, and the milestones payment will attach to — before anything is built. You'll know exactly what you're buying, what proves it, and what it costs if we're wrong.</p>
+    </div>
+    <div class="cta-alt">
+      <div class="cta-label">Not ready for that?</div>
+      <p><strong>Take a reference call.</strong> Speak with a technology leader who ran this model through an enterprise contact-center modernization — the milestones, the scoreboard, and what happened after go-live. Your Microsoft account team can arrange it.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="tag">Modern CRM. Active Agents. Verified Outcomes.</div>
+    <div>Microsoft + congruentX · Managed Outcomes · Draft for joint review · September 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
