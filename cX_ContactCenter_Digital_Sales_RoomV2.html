@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Center Outcomes — Microsoft + congruentX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#2F4155; --navy-deep:#22303E; --green:#8DC63F; --green-dark:#6FA82E;
+    --green-soft:#EEF6E2; --paper:#FFFFFF; --mist:#F5F7F9; --ink:#22303E;
+    --muted:#68788A; --line:#E3E8ED; --red:#D64545; --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.6}
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif}
+  .eyebrow{font-family:'Poppins',sans-serif;font-size:12px;letter-spacing:.32em;font-weight:600;text-transform:uppercase;color:var(--green-dark)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+  section{position:relative}
+
+  .rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.6,.2,1),transform .7s cubic-bezier(.2,.6,.2,1)}
+  .rv.in{opacity:1;transform:none}
+  .rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+
+  /* ---------- hero ---------- */
+  .hero{min-height:88vh;display:flex;align-items:center;background:var(--paper);position:relative;overflow:hidden}
+  .hero .wrap{position:relative;z-index:2}
+  .hero-line{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+  #heroPath{stroke-dasharray:var(--hp-len,2400);stroke-dashoffset:var(--hp-len,2400);animation:heroDraw 2.6s cubic-bezier(.4,0,.2,1) .3s forwards}
+  @keyframes heroDraw{to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion: reduce){#heroPath{animation:none;stroke-dashoffset:0}}
+  @media (max-width:720px){#heroPath{opacity:.35}}
+  .hero .brandline{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--navy);margin-bottom:28px}
+  .hero .brandline .x{color:var(--green)}
+  .hero .brandline .ms{color:var(--muted);font-weight:400;font-size:13px}
+  .hero h1{font-size:clamp(40px,6.5vw,76px);font-weight:700;line-height:1.05;color:var(--navy);letter-spacing:-.02em;max-width:15em}
+  .hero h1 .g{color:var(--green-dark)}
+  .hero p.lede{font-size:clamp(17px,2vw,21px);color:var(--muted);margin-top:24px;max-width:32em}
+  .hero p.lede strong{color:var(--ink);font-weight:600}
+  .hero-qs{margin-top:34px;display:flex;gap:12px;flex-wrap:wrap}
+  .hq{font-size:13.5px;font-weight:500;color:var(--navy);background:var(--mist);border:1px solid var(--line);border-radius:100px;padding:9px 18px}
+  .scroll-cue{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+  .scroll-cue .bar{width:1px;height:40px;background:linear-gradient(var(--muted),transparent);animation:cue 1.8s ease-in-out infinite}
+  @keyframes cue{0%,100%{opacity:.35}50%{opacity:1}}
+
+  /* ---------- block headers ---------- */
+  .chapter{padding-top:110px}
+  .chapter h2{font-size:clamp(30px,4vw,46px);font-weight:600;color:var(--navy);line-height:1.15;letter-spacing:-.015em;max-width:20em}
+  .chapter .sub{margin-top:16px;font-size:17px;color:var(--muted);max-width:38em}
+  .bnum{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--green-dark);margin-bottom:14px}
+
+  /* ---------- block 1: problem ---------- */
+  .problem{background:var(--mist)}
+  .problem .inner{padding:100px 0 110px}
+  .prob-grid{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .prob-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px}
+  .prob-card.bad h3{color:var(--red)}
+  .prob-card.good{border-color:#CDE3A8;background:linear-gradient(180deg,#FDFEFB, #F7FBEF)}
+  .prob-card.good h3{color:var(--green-dark)}
+  .prob-card h3{font-size:18px;font-weight:600;margin-bottom:14px}
+  .prob-card ul{list-style:none}
+  .prob-card li{font-size:14px;color:var(--ink);padding:9px 0 9px 24px;position:relative;border-top:1px solid var(--line);line-height:1.55}
+  .prob-card li:first-child{border-top:none}
+  .prob-card.bad li::before{content:"✕";position:absolute;left:0;top:10px;color:var(--red);font-weight:600;font-size:12px}
+  .prob-card.good li::before{content:"✓";position:absolute;left:0;top:10px;color:var(--green-dark);font-weight:700;font-size:12px}
+  .prob-card li strong{font-weight:600}
+  .prob-tail{margin-top:40px;text-align:center;font-family:'Poppins',sans-serif;font-size:clamp(19px,2.4vw,25px);color:var(--navy);font-weight:500;max-width:34em;margin-left:auto;margin-right:auto}
+  .prob-tail em{color:var(--green-dark);font-style:normal;font-weight:600}
+
+
+  /* ---------- two futures toggle ---------- */
+  .toggle-row{display:flex;justify-content:center;margin:44px 0 30px}
+  .toggle{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px;gap:4px}
+  .toggle button{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;border:none;cursor:pointer;padding:12px 30px;border-radius:999px;background:transparent;color:var(--muted);transition:all .35s}
+  .toggle button.active{background:var(--navy);color:#fff;box-shadow:0 6px 18px rgba(34,48,62,.25)}
+  .toggle button.active.cx{background:var(--green-dark)}
+  .frame{background:var(--paper);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 70px rgba(34,48,62,.08);padding:34px 34px 24px;position:relative;overflow:hidden}
+  .future-tag{position:absolute;top:26px;right:30px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:8px 16px;border-radius:999px;transition:all .4s}
+  .future-tag.old{background:#FBECEC;color:var(--red)}
+  .future-tag.cx{background:var(--green-soft);color:var(--green-dark)}
+  .verdict{margin-top:14px;text-align:center;font-size:15px;color:var(--muted)}
+  .verdict strong{color:var(--navy);font-weight:600}
+  @media (max-width:640px){.future-tag{position:static;display:inline-block;margin-bottom:12px}.frame{padding:20px 16px}}
+
+  /* ---------- block 2: model ---------- */
+  .model .inner{padding:100px 0 110px}
+  .def-strip{margin-top:44px;background:var(--navy-deep);border-radius:var(--radius);padding:30px 34px;color:#fff}
+  .def-strip .dl{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+  .def-strip p{font-size:16.5px;line-height:1.7;color:#D7DEE6;max-width:56em}
+  .def-strip p strong{color:#fff;font-weight:600}
+  .rungs{margin-top:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .rung{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;display:flex;flex-direction:column}
+  .rung .rdot{width:10px;height:10px;border-radius:50%;margin-bottom:12px}
+  .rung.r1 .rdot{background:var(--navy)}
+  .rung.r2 .rdot{background:var(--green)}
+  .rung.r3 .rdot{background:#fff;border:3px solid var(--green)}
+  .rung.r4 .rdot{background:#C3CCD5}
+  .rung h4{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:3px}
+  .rung .rl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .rung p{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .rung.r4{background:var(--mist);border-style:dashed}
+  .model-notline{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .mn{border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px}
+  .mn h4{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px}
+  .mn p{font-size:13.5px;color:var(--muted);line-height:1.6}
+  .mn p strong{color:var(--ink);font-weight:600}
+  .mn.risk{border-color:#CDE3A8;background:#FBFDF6}
+
+
+  /* ---------- payment rung sequence ---------- */
+  .rungs-wrap{position:relative;margin-top:22px}
+  .rungs-wrap .rungs{margin-top:0}
+  .rung{opacity:0;transform:translateX(-18px);transition:opacity .5s ease, transform .5s ease}
+  .rungs-wrap.play .rung{opacity:1;transform:none}
+  .rungs-wrap.play .rung:nth-child(1){transition-delay:.05s}
+  .rungs-wrap.play .rung:nth-child(2){transition-delay:.5s}
+  .rungs-wrap.play .rung:nth-child(3){transition-delay:.95s}
+  .rungs-wrap.play .rung:nth-child(4){transition-delay:1.4s}
+  .fee-track{position:absolute;left:0;right:0;top:-16px;height:14px;pointer-events:none}
+  .fee-line{position:absolute;left:2%;top:6px;height:2.5px;width:0;background:var(--green);border-radius:2px;transition:width 1.9s cubic-bezier(.4,0,.2,1)}
+  .rungs-wrap.play .fee-line{width:71%}
+  .fee-dot{position:absolute;top:0;left:2%;width:13px;height:13px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(141,198,63,.25);opacity:0;transition:left 1.9s cubic-bezier(.4,0,.2,1), opacity .3s}
+  .rungs-wrap.play .fee-dot{left:71%;opacity:1}
+  .fee-stop{position:absolute;top:-22px;left:71%;transform:translateX(-50%);font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green-dark);opacity:0;transition:opacity .5s ease 2s}
+  .rungs-wrap.play .fee-stop{opacity:1}
+  @media (prefers-reduced-motion: reduce){
+    .rung{opacity:1;transform:none;transition:none}
+    .fee-line{transition:none;width:71%}
+    .fee-dot{transition:none;left:71%;opacity:1}
+    .fee-stop{transition:none;opacity:1}
+  }
+  @media (max-width:880px){.fee-track{display:none}.rung{transform:translateY(14px)}}
+
+  /* ---------- block 3: proof ---------- */
+  .proof{background:var(--mist)}
+  .proof .inner{padding:100px 0 110px}
+  .stories{margin-top:52px;display:grid;grid-template-columns:minmax(0,780px);justify-content:center}
+  .story{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:38px 40px}
+  .story .who{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green-dark);margin-bottom:10px}
+  .story h3{font-size:clamp(21px,2.6vw,27px);font-weight:600;color:var(--navy);line-height:1.25;margin-bottom:22px}
+  .phase{margin-top:18px}
+  .phase-label{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px}
+  .phase-label.bad{color:var(--red)}
+  .phase-label.good{color:var(--green-dark)}
+  .phase p{font-size:14.5px;line-height:1.65;color:var(--ink)}
+  .quoteline{margin:24px 0 8px;padding:16px 22px;border-left:4px solid var(--green);background:var(--green-soft);border-radius:0 12px 12px 0;font-size:14.5px;font-style:italic;color:var(--navy);line-height:1.6}
+  .proofbar{margin-top:26px;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:22px}
+  .bignum{font-family:'Poppins',sans-serif;font-size:38px;font-weight:700;color:var(--green-dark);line-height:1}
+  .bignum small{display:block;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:8px;max-width:16em;line-height:1.5}
+  .alsos{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--ink);padding-top:4px}
+  .alsos span{padding-left:20px;position:relative}
+  .alsos span::before{content:"✓";position:absolute;left:0;color:var(--green-dark);font-weight:700;font-size:12px}
+  .refcall{margin-top:20px;border-top:1px dashed var(--line);padding-top:14px;font-size:13.5px;color:var(--muted)}
+  .refcall strong{color:var(--green-dark);font-weight:600}
+  .scale-note{margin-top:30px;text-align:center;font-size:14px;color:var(--muted);max-width:40em;margin-left:auto;margin-right:auto}
+  .scale-note strong{color:var(--navy);font-weight:600}
+
+  /* ---------- block 4: outcomes picker ---------- */
+  .picker .inner{padding:100px 0 110px}
+  .chips{margin-top:44px;display:flex;flex-wrap:wrap;gap:12px}
+  .chip{font-family:'Poppins',sans-serif;font-size:14px;font-weight:500;color:var(--navy);background:var(--paper);border:1.5px solid var(--line);border-radius:100px;padding:12px 22px;cursor:pointer;transition:border-color .2s, background .2s, color .2s}
+  .chip:hover{border-color:var(--green)}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .chip:focus-visible{outline:2px solid var(--green-dark);outline-offset:2px}
+  .detail{margin-top:26px;border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px;background:var(--mist);display:none}
+  .detail.show{display:block}
+  .detail h4{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:6px}
+  .detail .row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+  .detail h6{font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green-dark);margin-bottom:6px}
+  .detail p{font-size:13.5px;color:var(--ink);line-height:1.6}
+  .detail .foot{margin-top:14px;font-size:12px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+  .picker-note{margin-top:20px;font-size:13.5px;color:var(--muted);max-width:44em}
+
+  /* ---------- block 5: path / cta ---------- */
+  .cta-sec .inner{padding:100px 0 60px}
+  .sprint{margin-top:44px;display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+  .sprint-main{background:var(--navy-deep);border-radius:var(--radius);padding:36px 38px;color:#fff}
+  .sprint-main .sl{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+  .sprint-main h3{font-size:clamp(24px,3vw,32px);font-weight:600;line-height:1.2;margin-bottom:14px}
+  .sprint-main p{font-size:15px;color:#D7DEE6;line-height:1.7;max-width:34em}
+  .sprint-main p strong{color:#fff}
+  .sprint-steps{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:28px 30px}
+  .sstep{display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--line);align-items:flex-start}
+  .sstep:first-child{border-top:none;padding-top:0}
+  .snum{width:26px;height:26px;border-radius:50%;background:var(--green-soft);color:var(--green-dark);font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+  .sstep h5{font-family:'Poppins',sans-serif;font-size:14.5px;font-weight:600;color:var(--navy)}
+  .sstep p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .contact{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .contact .cbtn{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;background:var(--green);color:var(--navy-deep);border-radius:100px;padding:13px 28px;text-decoration:none;display:inline-block}
+  .contact .alt{font-size:13.5px;color:var(--muted)}
+  .contact .alt strong{color:var(--navy);font-weight:600}
+
+  .closer{background:var(--paper);text-align:center;padding:70px 32px 60px;border-top:1px solid var(--line)}
+  .closer .tag{font-family:'Poppins',sans-serif;font-size:clamp(19px,2.4vw,24px);font-weight:600;color:var(--navy)}
+  .closer .tag .g{color:var(--green-dark)}
+  .closer .fine{margin-top:14px;font-size:11.5px;color:var(--muted)}
+
+  @media (max-width:880px){
+    .prob-grid,.model-notline,.sprint,.detail .row{grid-template-columns:1fr}
+    .rungs{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:560px){.rungs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <svg class="hero-line" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="heroStroke" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#D4DAE0"/>
+        <stop offset="0.42" stop-color="#D4DAE0"/>
+        <stop offset="0.62" stop-color="#BCD59A"/>
+        <stop offset="1" stop-color="#8DC63F"/>
+      </linearGradient>
+    </defs>
+    <path id="heroPath" d="M -40 430 C 140 450, 300 480, 460 500 C 580 514, 660 516, 740 500 C 860 476, 980 400, 1100 310 C 1220 220, 1330 140, 1480 60"
+          fill="none" stroke="url(#heroStroke)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+  </svg>
+  <div class="wrap">
+    <div class="brandline rv in">congruent<span class="x">X</span> &nbsp;<span class="ms">· a Microsoft partner for contact-center outcomes</span></div>
+    <h1 class="rv in">Your contact center, <span class="g">measurably better</span> — or we don't get fully paid.</h1>
+    <p class="lede rv in d1">Most contact-center technology projects end at go-live. Ours are structured so payment releases as <strong>verified improvements land</strong> — and we stay on the field after launch to keep them landing.</p>
+    <div class="hero-qs rv in d2">
+      <span class="hq">How will you help me?</span>
+      <span class="hq">What's in it for me?</span>
+      <span class="hq">Where have you done this before?</span>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Three questions, answered below</span><div class="bar"></div></div>
+</section>
+
+<!-- ============ BLOCK 1 · THE PROBLEM ============ -->
+<section class="problem">
+  <div class="wrap inner">
+    <div class="chapter">
+      <div class="bnum">01 · The problem</div>
+      <h2 class="rv">Why contact-center projects go live and nothing improves.</h2>
+      <p class="sub rv d1">The technology usually works. The delivery model is what fails — because it measures effort, not improvement.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="prob-card bad rv">
+        <h3>The traditional implementation</h3>
+        <ul>
+          <li><strong>Paid on hours,</strong> so the incentive is effort, not improvement.</li>
+          <li><strong>Go-live is the finish line.</strong> The team rolls off exactly when your agents need the most help.</li>
+          <li><strong>Every requirement gets built,</strong> so agents inherit cluttered screens that slow every call down.</li>
+          <li><strong>Success is reported in activity</strong> — workshops held, milestones green — while handle time and satisfaction sit unmeasured.</li>
+        </ul>
+      </div>
+      <div class="prob-card good rv d1">
+        <h3>Managed outcomes</h3>
+        <ul>
+          <li><strong>Paid on verified results.</strong> Fees attach to improvements you can see in your own telemetry.</li>
+          <li><strong>Go-live is mile one.</strong> We monitor, tune, and improve continuously after launch.</li>
+          <li><strong>Built for the call, not the requirement list</strong> — only what makes agents faster and customers happier.</li>
+          <li><strong>Success is reported in your measures</strong> — handle time, resolution, satisfaction — on a scoreboard we both see.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- old way vs cX way — the toggle chart -->
+    <div class="toggle-row rv d2">
+      <div class="toggle" role="tablist" aria-label="Choose a future">
+        <button id="btnOld" class="active" role="tab" aria-selected="true">The Old Way</button>
+        <button id="btnCx" class="cx" role="tab" aria-selected="false">Managed Outcomes</button>
+      </div>
+    </div>
+<div class="frame rv d3">
+      <span class="future-tag old" id="futureTag">Wrong finish line</span>
+      <svg viewBox="0 0 900 480" width="100%" role="img" aria-label="Toggleable chart comparing old decay path with congruentX rising path">
+        <line x1="70" y1="420" x2="860" y2="420" stroke="#22303E" stroke-width="2"/>
+        <line x1="70" y1="420" x2="70" y2="40" stroke="#22303E" stroke-width="2"/>
+        <polygon points="860,420 848,414 848,426" fill="#22303E"/>
+        <polygon points="70,40 64,52 76,52" fill="#22303E"/>
+        <text class="axis-label" x="40" y="230" font-size="15" fill="#22303E" transform="rotate(-90 40 230)" text-anchor="middle">Features · Value</text>
+        <text class="axis-label" x="120" y="450" font-size="14" fill="#68788A">Kickoff</text>
+        <text class="axis-label" x="800" y="450" font-size="14" fill="#68788A">Time</text>
+
+        <!-- OLD -->
+        <g id="gOld">
+          <line x1="330" y1="70" x2="330" y2="420" stroke="#D64545" stroke-width="2.5" stroke-dasharray="8 7"/>
+          <text x="330" y="56" font-size="13.5" fill="#D64545" text-anchor="middle" font-weight="600">Go-live = finish line</text>
+          <path id="oldPath" d="M 120 300 C 200 220, 280 130, 330 110 C 420 130, 470 240, 540 310 C 600 365, 680 382, 760 375"
+                fill="none" stroke="#22303E" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="760" cy="375" r="8" fill="#D64545"/>
+          <text x="760" y="348" font-size="15" fill="#22303E" text-anchor="middle" font-weight="600">1 in 5</text>
+        </g>
+
+        <!-- CX -->
+        <g id="gCx" opacity="0">
+          <line x1="330" y1="70" x2="330" y2="420" stroke="#8DC63F" stroke-width="2.5" stroke-dasharray="8 7"/>
+          <text x="330" y="56" font-size="13.5" fill="#6FA82E" text-anchor="middle" font-weight="600">Go-live = starting line</text>
+          <path id="cxPath" d="M 130 380 C 190 360, 230 330, 280 300 C 340 262, 400 245, 470 220 C 540 196, 590 165, 650 130 C 700 100, 740 85, 790 72"
+                fill="none" stroke="#6FA82E" stroke-width="4.5" stroke-linecap="round"/>
+          <g class="node"><circle cx="245" cy="318" r="26" fill="#fff" stroke="#8DC63F" stroke-width="3"/>
+            <text x="245" y="324" font-size="16" text-anchor="middle" font-weight="700" fill="#2F4155">1</text>
+            <text x="245" y="372" font-size="15.5" text-anchor="middle" font-weight="600" fill="#2F4155" font-family="Poppins">Onboard</text>
+            <text x="245" y="392" font-size="12.5" text-anchor="middle" fill="#68788A">with CoreOS</text></g>
+          <g class="node"><circle cx="500" cy="208" r="26" fill="#fff" stroke="#8DC63F" stroke-width="3"/>
+            <text x="500" y="214" font-size="16" text-anchor="middle" font-weight="700" fill="#2F4155">2</text>
+            <text x="500" y="262" font-size="15.5" text-anchor="middle" font-weight="600" fill="#2F4155" font-family="Poppins">Adopt</text>
+            <text x="500" y="282" font-size="12.5" text-anchor="middle" fill="#68788A">with AgentOS</text></g>
+          <g class="node"><circle cx="750" cy="85" r="26" fill="#fff" stroke="#6FA82E" stroke-width="3"/>
+            <text x="750" y="91" font-size="16" text-anchor="middle" font-weight="700" fill="#2F4155">3</text>
+            <text x="750" y="139" font-size="15.5" text-anchor="middle" font-weight="600" fill="#2F4155" font-family="Poppins">Achieve</text>
+            <text x="750" y="159" font-size="12.5" text-anchor="middle" fill="#68788A">outcomes with RevOS</text></g>
+        </g>
+      </svg>
+      <p class="verdict" id="verdict"><strong>The old way:</strong> value peaks at launch, then decays back to the industry's 1-in-5.</p>
+    </div>
+    <p class="prob-tail rv d3">Only <em>1 in 5</em> CRM customers ever sees a tangible business outcome. That's not a technology failure — it's what happens when go-live is the finish line. <em>Managed outcomes</em> is the punchline: we stay on the field after launch, and our fee depends on the climb.</p>
+
+  </div>
+</section>
+
+<!-- ============ BLOCK 2 · OUTCOMES & THE COMMERCIAL MODEL ============ -->
+<section class="model">
+  <div class="wrap inner">
+    <div class="chapter">
+      <div class="bnum">02 · The model</div>
+      <h2 class="rv">What an outcome is — and how we get paid.</h2>
+      <p class="sub rv d1">Many firms market "outcomes" and bill for hours. The difference is visible in the fee structure, so here is ours.</p>
+    </div>
+    <div class="def-strip rv">
+      <div class="dl">What we mean by an outcome</div>
+      <p>An outcome is a <strong>specific, measurable improvement in how your contact center performs</strong> — agreed with you up front, baselined before we start, and verified through telemetry from your own environment. <strong>Technical outcomes</strong> get the platform live: modern workspace, unified data, AI assistance in the queue. <strong>Business outcomes</strong> are why you're doing it: faster resolution, shorter handle time, happier customers.</p>
+    </div>
+    <div class="rungs-wrap rv d1" id="rungsWrap">
+      <div class="fee-track" aria-hidden="true"><div class="fee-line" id="feeLine"></div><div class="fee-dot" id="feeDot"></div><div class="fee-stop" id="feeStop">fees stop here</div></div>
+      <div class="rungs">
+      <div class="rung r1"><div class="rdot"></div><h4>Platform verified live</h4><div class="rl">Fee releases on proof</div><p>Workspace live, data unified, AI assistance deployed to your queue. Evidenced by deployment records and telemetry — not a status report.</p></div>
+      <div class="rung r2"><div class="rdot"></div><h4>Your team adopting</h4><div class="rl">Fee releases on use</div><p>Your named agents actively working in it, measured as a rate — so your staffing decisions never distort the measure, in either direction.</p></div>
+      <div class="rung r3"><div class="rdot"></div><h4>The work changing</h4><div class="rl">Fee releases on behavior</div><p>Calls documented completely, callbacks inside SLA, AI suggestions staying useful — the behaviors that predict your business measures.</p></div>
+      <div class="rung r4"><div class="rdot"></div><h4>Business results</h4><div class="rl">Tracked &amp; reported openly</div><p>Handle time, resolution, satisfaction, cost-to-serve — baselined, tracked quarterly, and reported honestly with the context that affects them.</p></div>
+    </div>
+    </div>
+    <div class="model-notline">
+      <div class="mn risk rv">
+        <h4>What "fees at risk" means here</h4>
+        <p>A portion of our fee is <strong>only invoiceable when a milestone verifies.</strong> If a milestone is missed, the fee is held, we remediate at our cost, and it's remeasured. <strong>Not verified, not invoiced.</strong> And the total never inflates — a $1M engagement stays a $1M engagement; what changes is that payment follows proof.</p>
+      </div>
+      <div class="mn rv d1">
+        <h4>What financial risk stays with you</h4>
+        <p>We're direct about this: business results depend on factors we share — your staffing, your sponsorship, your market. That's why fees attach to the drivers we can verify, while business measures are <strong>baselined, tracked, and reported openly</strong> — never hidden behind a claim.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BLOCK 3 · THE PROOF POINT ============ -->
+<section class="proof">
+  <div class="wrap inner">
+    <div class="chapter" style="text-align:center">
+      <div class="bnum">03 · The proof</div>
+      <h2 class="rv" style="margin:0 auto">Where we've done this before.</h2>
+      <p class="sub rv d1" style="margin:16px auto 0">An 8,000-seat contact center. A decade of stalled CRM. A different ending — and a reference call you can take.</p>
+    </div>
+    <div class="stories">
+      <article class="story rv">
+        <div class="who">Healthcare · Contact center · 8,000 seats</div>
+        <h3>Paid on the outcomes they deliver. Couldn't measure a single one.</h3>
+        <div class="phase">
+          <div class="phase-label bad">The constraint</div>
+          <p><strong><span class="cnt burn-cnt" data-target="2.5" data-decimals="1" data-suffix=" years">2.5 years</span> and $<span class="cnt burn-cnt" data-target="10" data-suffix="M+">10M+</span></strong> with a prior partner who built nearly every requirement with no hypothesis. The result: forms with double-digit tabs and multiple scrolls, virtually unusable in a live queue. This client is paid on the <strong>outcomes they deliver to the people they serve</strong> — and the design made those outcomes invisible. Agents worked around the system; leaders flew blind; the revenue model and the operating system pointed in opposite directions.</p>
+        </div>
+        <div class="phase">
+          <div class="phase-label good">The cX intervention</div>
+          <p>We led with an opinionated, research-led hypothesis, and built only <strong>the 20% that was truly their secret sauce</strong> — a modern service workspace on Dynamics 365, case and interaction data unified, telemetry in from cutover so outcomes became measurable on day one. First group live in <strong><span class="cnt fast-cnt" data-target="5" data-suffix=" months">5 months</span></strong>, with fee tranches attached to verified milestones — platform live, agents adopted — not hours burned.</p>
+        </div>
+        <div class="quoteline">This client's revenue depends on the outcomes they deliver to the people they serve. The old system was designed in a way that made those outcomes impossible to measure. Now they can.</div>
+        <div class="proofbar">
+          <div class="bignum"><span class="cnt fast-cnt" data-target="25" data-suffix="">25</span>–<span class="cnt fast-cnt" data-target="40" data-suffix="%">40%</span><small>faster resolution times, with their outcomes now trackable</small></div>
+          <div class="alsos">
+            <span>Live in 5 months, after 2.5 stalled years</span>
+            <span>Agent experience significantly improved</span>
+            <span>Outcome measurement unlocked</span>
+            <span>AI assistance monitored, governed &amp; tuned post-go-live</span>
+          </div>
+        </div>
+        <div class="refcall">Not a public reference — but their technology leader takes reference calls. <strong>Ask your Microsoft account team to arrange one.</strong></div>
+      </article>
+    </div>
+    <p class="scale-note rv d1">Running 400 seats? An operation that handled <strong>8,000</strong> handles yours. Running 20,000? <strong>Let's have a deeper conversation</strong> — this is the scale where our model matters most.</p>
+  </div>
+</section>
+
+<!-- ============ BLOCK 4 · YOUR OUTCOMES ============ -->
+<section class="picker">
+  <div class="wrap inner">
+    <div class="chapter">
+      <div class="bnum">04 · Your outcomes</div>
+      <h2 class="rv">Which of these would change your operation?</h2>
+      <p class="sub rv d1">Tap any measure to see what we instrument, and what typically has to change in the work for it to move.</p>
+    </div>
+    <div class="chips rv" id="chips"></div>
+    <div class="detail" id="detail" aria-live="polite"></div>
+    <p class="picker-note rv d1">These are the measures we baseline together during a Proof Sprint — whatever your industry. Healthcare, financial services, retail, public sector: the queue physics are the same; the thresholds are yours.</p>
+  </div>
+</section>
+
+<!-- ============ BLOCK 5 · THE PATH ============ -->
+<section class="cta-sec">
+  <div class="wrap inner">
+    <div class="chapter">
+      <div class="bnum">05 · Next step</div>
+      <h2 class="rv">Start with 72 hours. Yours costs two or three.</h2>
+    </div>
+    <div class="sprint">
+      <div class="sprint-main rv">
+        <div class="sl">The 72-hour Proof Sprint</div>
+        <h3>In three days, you'll know exactly what you'd be buying.</h3>
+        <p>We take your contact-center measures, your volumes, and your constraint, and come back with an <strong>outcomes-based proposal</strong>: the improvements to target, the baselines and milestones payment would attach to — and what it costs. <strong>Your team's total time commitment: two to three hours.</strong> If the proposal isn't compelling, you've spent an afternoon finding that out.</p>
+        <div class="contact">
+          <a class="cbtn" href="mailto:outcomes@congruentx.com?subject=Contact%20Center%20Proof%20Sprint">Start the Proof Sprint</a>
+          <div class="alt">or reply to the person who sent you this — <strong>your Microsoft team will connect us.</strong></div>
+        </div>
+      </div>
+      <div class="sprint-steps rv d1">
+        <div class="sstep"><div class="snum">1</div><div><h5>Intro call — 45 min</h5><p>Your measures, your volumes, your constraint. We listen more than we talk.</p></div></div>
+        <div class="sstep"><div class="snum">2</div><div><h5>We work — you don't</h5><p>Outcome hypothesis, baselines to verify, milestone structure, proposed fee model.</p></div></div>
+        <div class="sstep"><div class="snum">3</div><div><h5>Proposal review — 90 min</h5><p>The outcomes, the model, the fee structure, the estimate. Decide with everything visible.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="closer">
+  <div class="tag">Modern contact center. Active AI. <span class="g">Verified outcomes.</span></div>
+  <div class="fine">congruentX · a Microsoft partner · outcomes@congruentx.com · Shared by your Microsoft account team</div>
+</div>
+
+<script>
+(function(){
+  const io = new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.16});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+
+
+  /* ---- hero line length ---- */
+  const hp = document.getElementById('heroPath');
+  if(hp){ const L = hp.getTotalLength(); hp.style.setProperty('--hp-len', L); hp.style.strokeDasharray=L; hp.style.strokeDashoffset=L; }
+
+  /* ---- two futures: auto-play on scroll + manual toggle ---- */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const btnOld=document.getElementById('btnOld'), btnCx=document.getElementById('btnCx');
+  const gOld=document.getElementById('gOld'), gCx=document.getElementById('gCx');
+  const tag=document.getElementById('futureTag'), verdict=document.getElementById('verdict');
+  const cxPath=document.getElementById('cxPath'), oldPath=document.getElementById('oldPath');
+  const nodes = gCx ? gCx.querySelectorAll('.node') : [];
+  let cL=0, oL=0, played=false;
+  if(cxPath){cL=cxPath.getTotalLength();cxPath.style.strokeDasharray=cL;cxPath.style.strokeDashoffset=cL;}
+  if(oldPath){oL=oldPath.getTotalLength();}
+  nodes.forEach(n=>{n.style.opacity=0;n.style.transition='opacity .45s ease, transform .45s ease';n.style.transform='translateY(8px)';});
+
+  function showNodes(stagger){
+    nodes.forEach((n,k)=>setTimeout(()=>{n.style.opacity=1;n.style.transform='none';}, stagger? 300+k*380 : 0));
+  }
+  function setFuture(old, animate){
+    btnOld.classList.toggle('active', old);
+    btnCx.classList.toggle('active', !old);
+    btnOld.setAttribute('aria-selected', old);
+    btnCx.setAttribute('aria-selected', !old);
+    gOld.style.transition='opacity .6s'; gCx.style.transition='opacity .6s';
+    gOld.style.opacity = old?1:0.12;
+    gCx.style.opacity  = old?0:1;
+    if(old){gOld.style.opacity=1;}
+    tag.className = 'future-tag ' + (old?'old':'cx');
+    tag.textContent = old ? 'Wrong finish line' : 'Managed outcomes';
+    verdict.innerHTML = old
+      ? "<strong>The old way:</strong> value peaks at launch, then decays back to the industry's 1-in-5."
+      : "<strong>Managed outcomes:</strong> Onboard \u2192 Adopt \u2192 Achieve \u2014 improvements compound after go-live, verified by telemetry.";
+    if(!old && cxPath){
+      if(animate && !reduced){
+        cxPath.style.transition='none';
+        cxPath.style.strokeDashoffset=cL;
+        void cxPath.getBoundingClientRect();
+        cxPath.style.transition='stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)';
+        cxPath.style.strokeDashoffset=0;
+        showNodes(true);
+      } else {
+        cxPath.style.transition='none';
+        cxPath.style.strokeDashoffset=0;
+        showNodes(false);
+      }
+    }
+  }
+  function autoPlay(){
+    if(played) return; played=true;
+    if(reduced){ setFuture(false,false); return; }
+    // beat 1: draw the old line
+    if(oldPath){
+      oldPath.style.strokeDasharray=oL;
+      oldPath.style.strokeDashoffset=oL;
+      void oldPath.getBoundingClientRect();
+      oldPath.style.transition='stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1)';
+      oldPath.style.strokeDashoffset=0;
+    }
+    // beat 2: hold, then flip to managed outcomes
+    setTimeout(()=>{ setFuture(false,true); }, 2600);
+  }
+  if(btnOld&&btnCx){
+    btnOld.addEventListener('click',()=>{played=true;setFuture(true,false);});
+    btnCx.addEventListener('click',()=>{played=true;setFuture(false,true);});
+    const frameEl = document.querySelector('.frame');
+    if(frameEl){
+      const fio = new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){autoPlay();fio.disconnect();}})},{threshold:.5});
+      fio.observe(frameEl);
+    }
+  }
+
+
+  /* ---- proof count-ups ---- */
+  function runCounter(el){
+    if(reduced){return;}
+    const target=parseFloat(el.dataset.target), dec=parseInt(el.dataset.decimals||'0');
+    const suffix=el.dataset.suffix||'', slow=el.classList.contains('burn-cnt');
+    const dur = slow? 2200 : 900;
+    const t0 = performance.now();
+    function frame(t){
+      let p=Math.min((t-t0)/dur,1);
+      // burn numbers grind (ease-out long tail); cX numbers snap (ease-out fast)
+      p = slow ? 1-Math.pow(1-p,2) : 1-Math.pow(1-p,3);
+      const v = target*p;
+      el.textContent = v.toFixed(dec) + suffix;
+      if(p<1) requestAnimationFrame(frame);
+      else el.textContent = target.toFixed(dec).replace(/\.0$/,'') + suffix;
+    }
+    requestAnimationFrame(frame);
+  }
+  const cio = new IntersectionObserver(es=>{es.forEach(e=>{
+    if(e.isIntersecting){ runCounter(e.target); cio.unobserve(e.target); }
+  })},{threshold:.6});
+  document.querySelectorAll('.cnt').forEach(el=>cio.observe(el));
+
+
+  /* ---- payment rung sequence ---- */
+  const rw = document.getElementById('rungsWrap');
+  if(rw){
+    const rio = new IntersectionObserver(es=>{es.forEach(e=>{
+      if(e.isIntersecting){ rw.classList.add('play'); rio.disconnect(); }
+    })},{threshold:.35});
+    rio.observe(rw);
+  }
+
+  const OUTCOMES = [
+    {k:"Customer satisfaction", inst:"Post-interaction CSAT tied to the case record, so every score has a traceable interaction behind it — segmented by queue, team, and issue type.", change:"Agents get context before they answer and AI-drafted wrap-ups after — so the customer never repeats themselves and follow-ups actually happen.", note:"Baselined pre-launch; tracked quarterly with the drivers alongside."},
+    {k:"Average handle time", inst:"Handle time decomposed — talk, hold, wrap-up — per queue and per team, so you can see where the minutes actually go.", change:"Knowledge retrieval and suggested responses in the flow of the call; wrap-up automated to seconds instead of minutes.", note:"We target the segment, not the average — averages hide the queue that's bleeding."},
+    {k:"First-call resolution", inst:"Repeat-contact detection within a defined window, coded by cause — so 'resolved' means the customer didn't have to call back.", change:"Complete case context and guided next-best actions reduce the blind transfers and partial answers that create the second call.", note:"Cause coding is the unlock: you learn *why* calls come back."},
+    {k:"Deflection & self-service", inst:"Containment rate by intent — what self-service actually resolved versus what it bounced to an agent anyway.", change:"AI-powered self-service on the intents that genuinely self-serve, with clean handoff context when they don't.", note:"Deflection only counts when the customer got the answer — we measure it that way."},
+    {k:"Wrap-up & disposition", inst:"Wrap-up duration and disposition completeness per interaction — the quality of the record, not just its existence.", change:"AI drafts the summary and disposition from the conversation itself; the agent confirms in seconds. Complete data without the after-call tax.", note:"This is the behavior that makes every other measure trustworthy."},
+    {k:"Agent experience & retention", inst:"System friction signals — screens per task, after-call workload, override rates on AI suggestions — the leading indicators of burnout.", change:"One workspace instead of six tabs; the system carries the repetitive work so agents carry the judgment.", note:"Attrition is a lagging measure — we instrument what predicts it."},
+    {k:"Cost per contact", inst:"Fully loaded cost per resolved contact by channel — so 'cheaper' means genuinely resolved, not shifted or repeated.", change:"Shorter handles, fewer repeats, and genuine deflection compound into unit-cost movement you can audit.", note:"Reported with the context that moves it — volume mix, seasonality, staffing."}
+  ];
+  const chips = document.getElementById('chips');
+  const detail = document.getElementById('detail');
+  OUTCOMES.forEach((o,idx)=>{
+    const b = document.createElement('button');
+    b.className='chip'; b.textContent=o.k;
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      b.classList.add('on');
+      detail.className='detail show';
+      detail.innerHTML = `<h4>${o.k}</h4>
+        <div class="row">
+          <div><h6>What we instrument</h6><p>${o.inst}</p></div>
+          <div><h6>What has to change in the work</h6><p>${o.change}</p></div>
+        </div>
+        <div class="foot">${o.note} · Thresholds and baselines are set with you during the Proof Sprint — never invented beforehand.</div>`;
+    });
+    chips.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

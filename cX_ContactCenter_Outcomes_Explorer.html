@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Center Outcomes Explorer — Microsoft + congruentX</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#2F4155; --navy-deep:#22303E; --green:#8DC63F; --green-dark:#6FA82E;
+    --green-soft:#EEF6E2; --paper:#FFFFFF; --mist:#F5F7F9; --ink:#22303E;
+    --muted:#68788A; --line:#E3E8ED; --red:#D64545; --red-soft:#FBECEC; --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;line-height:1.6}
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+
+  /* masthead — same shell as the room */
+  .masthead{border-bottom:1px solid var(--line)}
+  .masthead .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:20px;padding-bottom:20px}
+  .brandline{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:var(--navy)}
+  .brandline .x{color:var(--green)}
+  .brandline .ms{color:var(--muted);font-weight:400;font-size:13px}
+  .doortag{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+  /* hero */
+  .hero{padding:64px 0 10px}
+  .hero h1{font-size:clamp(30px,4.6vw,52px);font-weight:700;line-height:1.1;color:var(--navy);letter-spacing:-.02em;max-width:17em}
+  .hero h1 .g{color:var(--green-dark)}
+  .hero p{font-size:16.5px;color:var(--muted);margin-top:16px;max-width:36em}
+
+  /* type selector */
+  .types{padding:38px 0 8px}
+  .types .lbl{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green-dark);margin-bottom:14px}
+  .type-row{display:flex;flex-wrap:wrap;gap:10px}
+  .tbtn{font-family:'Poppins',sans-serif;font-size:14px;font-weight:500;color:var(--navy);background:var(--paper);border:1.5px solid var(--line);border-radius:100px;padding:12px 22px;cursor:pointer;transition:all .2s}
+  .tbtn:hover{border-color:var(--green)}
+  .tbtn.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .tbtn:focus-visible{outline:2px solid var(--green-dark);outline-offset:2px}
+
+  /* outcome grid */
+  .board{padding:26px 0 90px}
+  .board-note{font-size:13.5px;color:var(--muted);margin-bottom:22px;min-height:1.4em}
+  .board-note strong{color:var(--navy);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .ocard{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px 20px;cursor:pointer;text-align:left;font-family:inherit;transition:border-color .2s, transform .2s, box-shadow .2s, opacity .35s;position:relative;opacity:0;transform:translateY(12px)}
+  .ocard.in{opacity:1;transform:none}
+  .ocard:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 12px 32px rgba(34,48,62,.08)}
+  .ocard:focus-visible{outline:2px solid var(--green-dark);outline-offset:2px}
+  .ocard .mini{height:44px;margin-bottom:12px}
+  .ocard h3{font-size:15.5px;font-weight:600;color:var(--navy);line-height:1.3;margin-bottom:5px}
+  .ocard p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .ocard .ptag{position:absolute;top:16px;right:16px;font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green-dark);background:var(--green-soft);border-radius:100px;padding:3px 10px}
+  .ocard .go{margin-top:10px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:var(--green-dark)}
+
+  /* flyout */
+  .scrim{position:fixed;inset:0;background:rgba(34,48,62,.4);opacity:0;pointer-events:none;transition:opacity .3s;z-index:90}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .panel{position:fixed;top:0;right:0;bottom:0;width:min(520px,94vw);background:#fff;z-index:100;transform:translateX(102%);transition:transform .38s cubic-bezier(.3,.9,.3,1);box-shadow:-16px 0 48px rgba(29,37,48,.16);display:flex;flex-direction:column}
+  .panel.on{transform:none}
+  .p-close{position:absolute;top:20px;right:20px;border:0;background:var(--mist);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--ink);z-index:2}
+  .p-close:hover{background:var(--line)}
+
+  /* before/after stage */
+  .p-stage{background:var(--mist);border-bottom:1px solid var(--line);padding:34px 36px 26px}
+  .p-kick{font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--green-dark)}
+  .p-name{font-family:'Poppins',sans-serif;font-weight:600;font-size:24px;letter-spacing:-.01em;color:var(--navy);margin-top:6px;line-height:1.2}
+  .ba{margin-top:22px;display:flex;align-items:center;justify-content:center;gap:26px}
+  .ba .cellwrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .ba .cell{width:96px;height:96px;border-radius:20px;background:#fff;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center}
+  .ba .cell svg{width:64px;height:64px;display:block}
+  .ba .cap{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+  .ba .cap.b{color:var(--red)} .ba .cap.a{color:var(--green-dark)}
+  .ba .arrow{flex:none}
+  .ba .arrow svg{display:block;overflow:visible}
+  #baArrowPath{stroke-dasharray:60;stroke-dashoffset:60}
+  /* animation choreography: before pops, arrow draws, after pops + ring, before dims */
+  .panel.on .cell.before{animation:popIn .4s cubic-bezier(.2,.7,.2,1) .15s both, dimDown .5s ease 1.75s forwards}
+  .panel.on #baArrowPath{animation:drawArrow .5s cubic-bezier(.4,0,.2,1) .85s forwards}
+  .panel.on .cell.after{animation:popIn .45s cubic-bezier(.2,.7,.2,1) 1.45s both}
+  .panel.on .cell.after::after{content:"";position:absolute;inset:-2px;border-radius:20px;border:2px solid var(--green);opacity:0;animation:ringPulse .7s ease-out 1.7s}
+  .ba .cell{position:relative}
+  @keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+  @keyframes dimDown{to{opacity:.42;filter:grayscale(.4)}}
+  @keyframes drawArrow{to{stroke-dashoffset:0}}
+  @keyframes ringPulse{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.18)}}
+  @media (prefers-reduced-motion: reduce){
+    .panel.on .cell.before{animation:none;opacity:.42;filter:grayscale(.4)}
+    .panel.on .cell.after{animation:none}
+    .panel.on .cell.after::after{animation:none}
+    .panel.on #baArrowPath{animation:none;stroke-dashoffset:0}
+  }
+
+  /* panel body */
+  .p-body{padding:10px 36px 40px;overflow-y:auto}
+  .p-sec{margin-top:24px}
+  .p-sec .k{font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .p-sec .k::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .p-sec.friction .k::before{background:var(--red)}
+  .p-sec .v{margin-top:7px;font-size:14.5px;color:var(--ink);line-height:1.65}
+  .p-sec .v strong{font-weight:600}
+  .p-sec .v em{color:var(--muted)}
+  .p-foot{margin-top:28px;border-top:1px dashed var(--line);padding-top:14px;font-size:12px;color:var(--muted);line-height:1.6}
+  .p-foot strong{color:var(--green-dark);font-weight:600}
+
+  .foot{border-top:1px solid var(--line);padding:26px 0 34px;margin-top:10px}
+  .foot .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+  .foot b{color:var(--navy)}
+
+  @media (max-width:880px){.grid{grid-template-columns:1fr 1fr}}
+  @media (max-width:580px){.grid{grid-template-columns:1fr}.ba{gap:14px}.ba .cell{width:80px;height:80px}}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brandline">congruent<span class="x">X</span> <span class="ms">· a Microsoft partner for contact-center outcomes</span></div>
+    <div class="doortag">Outcomes Explorer</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Which outcomes would move <span class="g">your</span> contact center?</h1>
+    <p>Pick the operation that looks like yours. Then open any outcome to see whose job changes, what they're trying to get done, and the friction we remove to get them there.</p>
+  </div>
+</section>
+
+<section class="types">
+  <div class="wrap">
+    <div class="lbl">Step 1 · Your operation</div>
+    <div class="type-row" id="typeRow"></div>
+  </div>
+</section>
+
+<section class="board">
+  <div class="wrap">
+    <p class="board-note" id="boardNote"></p>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Outcome detail"></aside>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>Modern contact center. Active AI. <b>Verified outcomes.</b></span>
+    <span>Baselines and thresholds are set with you during the Proof Sprint</span>
+    <span>congruentX · Shared by your Microsoft account team</span>
+  </div>
+</footer>
+
+<script>
+/* ============ GLYPHS — simple before/after icon pairs ============ */
+const S = {
+  navy:"#2F4155", green:"#6FA82E", greenL:"#8DC63F", red:"#D64545", gray:"#9AA6B2", line:"#C9D2DA"
+};
+const GLYPHS = {
+  cost: {
+    before:`<svg viewBox="0 0 64 64"><rect x="14" y="34" width="12" height="18" rx="2" fill="${S.gray}"/><rect x="28" y="24" width="12" height="28" rx="2" fill="${S.gray}"/><rect x="42" y="12" width="12" height="40" rx="2" fill="${S.red}"/><text x="48" y="9" font-size="10" fill="${S.red}" text-anchor="middle" font-weight="700">$</text></svg>`,
+    after:`<svg viewBox="0 0 64 64"><rect x="14" y="34" width="12" height="18" rx="2" fill="${S.gray}"/><rect x="28" y="38" width="12" height="14" rx="2" fill="${S.greenL}"/><rect x="42" y="42" width="12" height="10" rx="2" fill="${S.green}"/><path d="M40 20 l7 7 l12 -14" fill="none" stroke="${S.green}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  },
+  fcr: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="16" fill="none" stroke="${S.red}" stroke-width="4" stroke-dasharray="6 5"/><path d="M32 16 l5 -5 M32 16 l5 5" stroke="${S.red}" stroke-width="3" fill="none" stroke-linecap="round"/><text x="32" y="37" font-size="13" fill="${S.navy}" text-anchor="middle" font-weight="700">×3</text></svg>`,
+    after:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="16" fill="none" stroke="${S.green}" stroke-width="4"/><path d="M24 32 l6 6 l11 -13" fill="none" stroke="${S.green}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><text x="32" y="59" font-size="10" fill="${S.green}" text-anchor="middle" font-weight="700">ONCE</text></svg>`
+  },
+  csat: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18" fill="none" stroke="${S.gray}" stroke-width="4"/><circle cx="25" cy="27" r="2.6" fill="${S.navy}"/><circle cx="39" cy="27" r="2.6" fill="${S.navy}"/><path d="M24 42 q8 -6 16 0" fill="none" stroke="${S.red}" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+    after:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18" fill="none" stroke="${S.green}" stroke-width="4"/><circle cx="25" cy="27" r="2.6" fill="${S.navy}"/><circle cx="39" cy="27" r="2.6" fill="${S.navy}"/><path d="M23 38 q9 9 18 0" fill="none" stroke="${S.green}" stroke-width="3.5" stroke-linecap="round"/></svg>`
+  },
+  aht: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="32" cy="34" r="17" fill="none" stroke="${S.gray}" stroke-width="4"/><path d="M32 34 L32 21 A13 13 0 1 1 21 41 Z" fill="${S.red}" opacity=".55"/><line x1="32" y1="34" x2="32" y2="22" stroke="${S.navy}" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="34" x2="22" y2="40" stroke="${S.navy}" stroke-width="3" stroke-linecap="round"/></svg>`,
+    after:`<svg viewBox="0 0 64 64"><circle cx="32" cy="34" r="17" fill="none" stroke="${S.green}" stroke-width="4"/><path d="M32 34 L32 21 A13 13 0 0 1 42 26 Z" fill="${S.greenL}" opacity=".6"/><line x1="32" y1="34" x2="32" y2="22" stroke="${S.navy}" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="34" x2="40" y2="28" stroke="${S.navy}" stroke-width="3" stroke-linecap="round"/></svg>`
+  },
+  productivity: {
+    before:`<svg viewBox="0 0 64 64"><rect x="8" y="10" width="20" height="14" rx="2" fill="none" stroke="${S.gray}" stroke-width="2.5"/><rect x="22" y="18" width="20" height="14" rx="2" fill="none" stroke="${S.gray}" stroke-width="2.5"/><rect x="36" y="26" width="20" height="14" rx="2" fill="none" stroke="${S.red}" stroke-width="2.5"/><rect x="14" y="34" width="20" height="14" rx="2" fill="none" stroke="${S.gray}" stroke-width="2.5"/><circle cx="32" cy="55" r="5" fill="${S.navy}"/></svg>`,
+    after:`<svg viewBox="0 0 64 64"><rect x="14" y="12" width="36" height="26" rx="3" fill="none" stroke="${S.green}" stroke-width="3"/><line x1="20" y1="20" x2="40" y2="20" stroke="${S.greenL}" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="27" x2="34" y2="27" stroke="${S.line}" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="52" r="5" fill="${S.navy}"/><path d="M42 48 l4 4 l7 -8" fill="none" stroke="${S.green}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  },
+  attrition: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="16" cy="22" r="6" fill="${S.navy}"/><path d="M8 44 q8 -10 16 0" fill="${S.navy}"/><circle cx="34" cy="22" r="6" fill="${S.gray}"/><path d="M26 44 q8 -10 16 0" fill="${S.gray}"/><g opacity=".45"><circle cx="52" cy="22" r="6" fill="${S.red}"/><path d="M44 44 q8 -10 16 0" fill="${S.red}"/></g><path d="M50 30 l10 10 M60 30 l-10 10" stroke="${S.red}" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    after:`<svg viewBox="0 0 64 64"><circle cx="16" cy="22" r="6" fill="${S.navy}"/><path d="M8 44 q8 -10 16 0" fill="${S.navy}"/><circle cx="34" cy="22" r="6" fill="${S.navy}"/><path d="M26 44 q8 -10 16 0" fill="${S.navy}"/><circle cx="52" cy="22" r="6" fill="${S.green}"/><path d="M44 44 q8 -10 16 0" fill="${S.green}"/><path d="M46 52 l4 4 l8 -9" fill="none" stroke="${S.green}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+  },
+  containment: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="48" cy="32" r="9" fill="none" stroke="${S.red}" stroke-width="3"/><path d="M42 41 q6 6 12 0" fill="none" stroke="${S.red}" stroke-width="2.5"/><line x1="8" y1="16" x2="36" y2="28" stroke="${S.gray}" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="32" x2="36" y2="32" stroke="${S.gray}" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="48" x2="36" y2="36" stroke="${S.gray}" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    after:`<svg viewBox="0 0 64 64"><rect x="40" y="10" width="18" height="16" rx="4" fill="none" stroke="${S.green}" stroke-width="3"/><circle cx="46" cy="18" r="1.8" fill="${S.green}"/><circle cx="52" cy="18" r="1.8" fill="${S.green}"/><circle cx="49" cy="46" r="8" fill="none" stroke="${S.navy}" stroke-width="3"/><line x1="8" y1="14" x2="38" y2="17" stroke="${S.greenL}" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="28" x2="38" y2="20" stroke="${S.greenL}" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="46" x2="39" y2="46" stroke="${S.gray}" stroke-width="2.5" stroke-linecap="round"/></svg>`
+  },
+  speed: {
+    before:`<svg viewBox="0 0 64 64"><circle cx="12" cy="32" r="4.5" fill="${S.red}"/><circle cx="24" cy="32" r="4.5" fill="${S.gray}"/><circle cx="36" cy="32" r="4.5" fill="${S.gray}"/><circle cx="48" cy="32" r="4.5" fill="${S.gray}"/><circle cx="58" cy="32" r="4.5" fill="${S.gray}"/><text x="32" y="52" font-size="10" fill="${S.red}" text-anchor="middle" font-weight="700">WAITING…</text></svg>`,
+    after:`<svg viewBox="0 0 64 64"><circle cx="18" cy="32" r="4.5" fill="${S.green}"/><circle cx="32" cy="32" r="4.5" fill="${S.greenL}"/><path d="M42 26 l8 6 l-8 6" fill="none" stroke="${S.green}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><text x="32" y="52" font-size="10" fill="${S.green}" text-anchor="middle" font-weight="700">ANSWERED</text></svg>`
+  },
+  compliance: {
+    before:`<svg viewBox="0 0 64 64"><rect x="16" y="8" width="32" height="48" rx="4" fill="none" stroke="${S.gray}" stroke-width="3"/><line x1="23" y1="20" x2="41" y2="20" stroke="${S.line}" stroke-width="3" stroke-linecap="round"/><line x1="23" y1="30" x2="41" y2="30" stroke="${S.line}" stroke-width="3" stroke-linecap="round"/><path d="M22 40 l6 6 M28 40 l-6 6" stroke="${S.red}" stroke-width="3" stroke-linecap="round"/><text x="42" y="48" font-size="9" fill="${S.red}" text-anchor="middle" font-weight="700">2%</text></svg>`,
+    after:`<svg viewBox="0 0 64 64"><rect x="16" y="8" width="32" height="48" rx="4" fill="none" stroke="${S.green}" stroke-width="3"/><path d="M22 19 l4 4 l7 -8" fill="none" stroke="${S.green}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 31 l4 4 l7 -8" fill="none" stroke="${S.green}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 43 l4 4 l7 -8" fill="none" stroke="${S.green}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="42" y="52" font-size="9" fill="${S.green}" text-anchor="middle" font-weight="700">100%</text></svg>`
+  },
+  revenue: {
+    before:`<svg viewBox="0 0 64 64"><path d="M14 20 q0 -8 8 -8 l4 8 l-5 5 q3 8 10 11 l5 -5 l8 4 q0 8 -8 8 q-22 -2 -22 -23" fill="${S.gray}"/><text x="48" y="20" font-size="14" fill="${S.red}" text-anchor="middle" font-weight="700">–$</text></svg>`,
+    after:`<svg viewBox="0 0 64 64"><path d="M12 22 q0 -8 8 -8 l4 8 l-5 5 q3 8 10 11 l5 -5 l8 4 q0 8 -8 8 q-22 -2 -22 -23" fill="${S.navy}"/><circle cx="48" cy="18" r="10" fill="none" stroke="${S.green}" stroke-width="3"/><text x="48" y="23" font-size="13" fill="${S.green}" text-anchor="middle" font-weight="700">+$</text></svg>`
+  }
+};
+
+/* ============ OUTCOMES ============ */
+const OUTCOMES = {
+  cost: { name:"Lower cost per contact", glyph:"cost",
+    blurb:"Reduce handle time, deflect simple issues to self-service, and cut cost per resolved case.",
+    role:"<strong>Contact Center Director</strong> — accountable for the operating budget, working with the CFO's operations partner.",
+    jtbd:"Resolve more customer issues with the same budget — and know the true cost of a <em>resolved</em> contact, not just a handled one, so cost decisions don't quietly trade away quality.",
+    friction:"Cost is invisible per cause. Volume, repeats, and channel mix are tangled in one blended number, so every cost decision is a guess. Agents juggle disconnected apps that stretch every interaction, and the repeat contacts that drive cost the hardest are never coded to a reason anyone can fix.",
+    measured:"Fully loaded cost per resolved contact, by channel and cause — baselined during the Proof Sprint."},
+  fcr: { name:"Higher first-contact resolution", glyph:"fcr", 
+    blurb:"Solve the issue on the first interaction. This cuts repeat contacts and drives most other metrics.",
+    role:"<strong>Frontline service agent</strong> — the person on the interaction, supported by their team lead.",
+    jtbd:"Solve the customer's actual issue the first time — with the full history, entitlements, and next-best action in front of me — so the customer never has to call back and I never have to blind-transfer.",
+    friction:"Context is scattered across systems. The agent can't see prior contacts, open cases, or what was already promised — so they answer the fragment they can see, transfer what they can't, and the customer's second call is born before the first one ends.",
+    measured:"Repeat-contact rate within a defined window, coded by cause — so 'resolved' means the customer didn't come back."},
+  csat: { name:"Better customer satisfaction", glyph:"csat",
+    blurb:"CSAT and NPS: turn service interactions into loyalty instead of churn risk.",
+    role:"<strong>VP of Customer Experience</strong> — owns the relationship measures the board sees, delivered through every agent on every queue.",
+    jtbd:"Turn each service interaction into evidence the company knows this customer — greeted with context, resolved with confidence, followed up without being asked — so service builds loyalty instead of spending it.",
+    friction:"Every interaction starts from zero. The customer repeats their story, the agent apologizes for systems they can't see across, and the follow-up depends on a sticky note. The experience isn't failing on empathy — it's failing on context the agent was never given.",
+    measured:"Post-interaction CSAT tied to the case record, segmented by queue and issue type — every score traceable to its interaction."},
+  aht: { name:"Reduced average handle time", glyph:"aht",
+    blurb:"Faster resolutions without sacrificing quality, through knowledge in the flow and guided next steps.",
+    role:"<strong>Operations Manager</strong> — owns queue performance, working through team supervisors.",
+    jtbd:"Take minutes out of every interaction without taking quality out — kill the dead air spent searching, the mid-call app-hopping, and the after-call typing — so faster genuinely means better.",
+    friction:"The knowledge exists but isn't findable mid-call, so customers hold while agents hunt. Half the handle time isn't conversation at all — it's navigation and wrap-up. Cutting AHT by pressure just moves the time into repeat contacts; the friction is in the work, not the workers.",
+    measured:"Handle time decomposed — talk, hold, wrap-up — per queue, so you see where the minutes actually go."},
+  productivity: { name:"Improved agent productivity", glyph:"productivity",
+    blurb:"More contacts handled per agent per shift, without burning out the team.",
+    role:"<strong>Team Supervisor</strong> — responsible for a team's output and coaching, measured on both.",
+    jtbd:"Get more resolved contacts per agent per shift by removing the work that isn't the customer — the six open tabs, the manual logging, the swivel-chair lookups — not by pushing people harder.",
+    friction:"The system taxes every interaction. Agents alt-tab across a half-dozen windows, re-key the same data twice, and finish each call with minutes of manual documentation. The capacity is there — it's being spent on the tooling instead of the customer.",
+    measured:"Resolved contacts per active agent per shift — a rate within the named team, so staffing changes never distort it."},
+  attrition: { name:"Lower agent attrition", glyph:"attrition",
+    blurb:"Contact centers lose 30–45% of agents a year. Retention protects cost and service quality.",
+    role:"<strong>Contact Center Director with HR</strong> — carries the recruiting, training, and ramp cost of every departure.",
+    jtbd:"Keep good agents past the burnout wall by removing the daily friction that grinds them down — so experience compounds on the floor instead of walking out the door with 30–45% of the team each year.",
+    friction:"The tools are the exit interview. Cluttered screens, repetitive after-call work, and getting blamed for system failures they can't control make the job harder than the customers do. Attrition is measured annually, but its causes accumulate one frustrating interaction at a time — uninstrumented.",
+    measured:"Leading indicators first — screens per task, after-call workload, override rates — the friction signals that predict who leaves."},
+  containment: { name:"Higher self-service containment", glyph:"containment",
+    blurb:"Route more volume to bots and knowledge bases so live agents handle only what needs a human.",
+    role:"<strong>Digital Channel Owner</strong> — accountable for what self-service actually resolves, not what it merely receives.",
+    jtbd:"Contain the contacts that genuinely self-serve — with answers grounded in the same data agents use — and hand off the rest with full context, so deflection means the customer got resolved, not deflected twice.",
+    friction:"The bot can't see what the agents see. Disconnected from cases, orders, and entitlements, it answers generically, the customer bails to the queue, and arrives with no record of what they already tried — so the agent starts from zero and the 'deflected' contact costs more than if it had never been deflected at all.",
+    measured:"Containment by intent — resolved in self-service versus bounced to an agent — so deflection only counts when it worked."},
+  speed: { name:"Faster speed to answer", glyph:"speed",
+    blurb:"Shorter queue and wait times, especially for high-value or urgent contacts.",
+    role:"<strong>Workforce Management Lead</strong> — owns forecasting, staffing, and routing against service-level targets.",
+    jtbd:"Get the right contacts to the right agents fast — recognizing urgency and value at the front door, not after the customer has waited through a queue that treated everyone identically.",
+    friction:"Routing is blind at the moment it matters. The queue doesn't know this caller is high-value, mid-escalation, or thirty seconds from churning — intent is discovered by the agent, minutes in, instead of by the front door. So urgency waits behind routine, and staffing forecasts inherit the noise.",
+    measured:"Speed to answer by segment and intent — because the average hides exactly the callers who matter most."},
+  compliance: { name:"Better compliance & quality scores", glyph:"compliance",
+    blurb:"Consistent adherence to scripts, regulations, and QA standards — critical in financial services and healthcare.",
+    role:"<strong>QA & Compliance Lead</strong> — answerable to regulators and internal audit for what happens on every interaction.",
+    jtbd:"Know that every interaction met the standard — disclosures made, identity verified, process followed — with evidence that stands up to an auditor, not a sample and a hope.",
+    friction:"QA reviews 2% of interactions and vouches for 100%. Sampling finds problems weeks after they've repeated hundreds of times, coaching arrives long after the habit formed, and when the regulator asks, the honest answer is a confidence interval. The other 98% is where the risk lives — uninspected.",
+    measured:"Adherence signals on every interaction, not a sample — exceptions flagged as they happen, coaching same-week."},
+  revenue: { name:"Revenue capture from service", glyph:"revenue",
+    blurb:"Turn service calls into cross-sell, upsell, or retention saves instead of pure cost.",
+    role:"<strong>VP of Customer Growth</strong> — chartered to find revenue in the installed base, executed by service agents in the moment.",
+    jtbd:"Recognize the revenue moment inside the service moment — the save, the upgrade, the unmet need the customer just described — and act on it naturally, without turning a service call into a sales script.",
+    friction:"The signal dies in the call. The customer says 'we're growing' or 'we're frustrated' to the one person with no visibility into offers, eligibility, or retention plays — and no way to hand the moment to someone who has them. Thousands of buying signals a month, zero captured, because service and revenue run on separate systems.",
+    measured:"Save rate and qualified handoffs per active agent — revenue moments recognized, not just revenue booked."}
+};
+
+/* ============ CONTACT CENTER TYPES ============ */
+const TYPES = [
+  {id:"care", name:"High-volume customer care",
+   note:"B2C scale: the economics live in <strong>repeats, minutes, and containment</strong>.",
+   outcomes:["cost","fcr","aht","csat","containment","speed"], primary:["cost","fcr"]},
+  {id:"tech", name:"Technical support & help desk",
+   note:"Complex issues: the fight is <strong>resolution quality and knowledge in the flow</strong>.",
+   outcomes:["fcr","aht","productivity","csat","attrition","containment"], primary:["fcr"]},
+  {id:"health", name:"Healthcare & patient access",
+   note:"Every contact is a person mid-worry: <strong>experience, speed, and compliance</strong> carry the mission.",
+   outcomes:["csat","speed","compliance","fcr","attrition","cost"], primary:["csat","compliance"]},
+  {id:"fin", name:"Financial services",
+   note:"Regulated at every turn: <strong>compliance is the license to pursue everything else</strong>.",
+   outcomes:["compliance","fcr","csat","revenue","speed","cost"], primary:["compliance"]},
+  {id:"rev", name:"Sales, retention & collections",
+   note:"The queue is a revenue channel: <strong>every contact is a save or a sale in disguise</strong>.",
+   outcomes:["revenue","csat","productivity","speed","fcr","attrition"], primary:["revenue"]},
+  {id:"bpo", name:"BPO & outsourced operations",
+   note:"Margin lives in the operation itself: <strong>productivity, attrition, and provable quality</strong> win contracts.",
+   outcomes:["cost","productivity","attrition","aht","compliance","fcr"], primary:["productivity","attrition"]}
+];
+
+/* ============ RENDER ============ */
+const typeRow = document.getElementById('typeRow');
+const grid = document.getElementById('grid');
+const note = document.getElementById('boardNote');
+const panel = document.getElementById('panel');
+const scrim = document.getElementById('scrim');
+let currentType = TYPES[0];
+
+TYPES.forEach((t,i)=>{
+  const b=document.createElement('button');
+  b.className='tbtn'+(i===0?' on':''); b.textContent=t.name;
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); currentType=t; renderGrid();
+  });
+  typeRow.appendChild(b);
+});
+
+function renderGrid(){
+  grid.innerHTML='';
+  note.innerHTML = currentType.note + ' <span style="color:var(--muted)">— tap any outcome.</span>';
+  currentType.outcomes.forEach((oid,k)=>{
+    const o=OUTCOMES[oid];
+    const c=document.createElement('button');
+    c.className='ocard';
+    c.innerHTML = `${currentType.primary.includes(oid)?'<span class="ptag">Start here</span>':''}
+      <div class="mini">${GLYPHS[o.glyph].after.replace('viewBox','height="44" viewBox')}</div>
+      <h3>${o.name}</h3><p>${o.blurb}</p><div class="go">Whose job changes →</div>`;
+    c.addEventListener('click',()=>openOutcome(oid));
+    grid.appendChild(c);
+    setTimeout(()=>c.classList.add('in'), 40+k*70);
+  });
+}
+
+function openOutcome(oid){
+  const o=OUTCOMES[oid];
+  panel.innerHTML = `
+    <button class="p-close" aria-label="Close">✕</button>
+    <div class="p-stage">
+      <div class="p-kick">${currentType.name}</div>
+      <div class="p-name">${o.name}</div>
+      <div class="ba">
+        <div class="cellwrap"><div class="cell before">${GLYPHS[o.glyph].before}</div><div class="cap b">Before</div></div>
+        <div class="arrow"><svg width="52" height="24" viewBox="0 0 52 24"><path id="baArrowPath" d="M2 12 H42 M42 12 l-8 -7 M42 12 l-8 7" fill="none" stroke="#6FA82E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="cellwrap"><div class="cell after">${GLYPHS[o.glyph].after}</div><div class="cap a">After</div></div>
+      </div>
+    </div>
+    <div class="p-body">
+      <div class="p-sec"><div class="k">The role</div><div class="v">${o.role}</div></div>
+      <div class="p-sec"><div class="k">The job to be done</div><div class="v">${o.jtbd}</div></div>
+      <div class="p-sec friction"><div class="k">The digital friction we solve</div><div class="v">${o.friction}</div></div>
+      <div class="p-foot"><strong>How it's verified:</strong> ${o.measured} Thresholds are set with you — never invented beforehand.</div>
+    </div>`;
+  panel.querySelector('.p-close').addEventListener('click',closePanel);
+  // restart animations
+  panel.classList.remove('on'); void panel.offsetWidth;
+  panel.classList.add('on'); scrim.classList.add('on');
+  panel.querySelector('.p-close').focus();
+}
+function closePanel(){ panel.classList.remove('on'); scrim.classList.remove('on'); }
+scrim.addEventListener('click',closePanel);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
+
+renderGrid();
+</script>
+</body>
+</html>
